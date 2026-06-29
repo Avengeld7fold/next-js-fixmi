@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/* ============================
+   FIXMI Design System
+   Premium Dark Mode Theme
+   ============================ */
+
+:root {
+  /* Brand Colors */
+  --fixmi-primary: #6366f1;
+  --fixmi-primary-light: #818cf8;
+  --fixmi-primary-dark: #4f46e5;
+  --fixmi-accent: #06b6d4;
+  --fixmi-accent-light: #22d3ee;
+
+  /* Neutral Palette */
+  --fixmi-bg-primary: #09090b;
+  --fixmi-bg-secondary: #18181b;
+  --fixmi-bg-tertiary: #27272a;
+  --fixmi-bg-glass: rgba(24, 24, 27, 0.72);
+  --fixmi-bg-glass-strong: rgba(24, 24, 27, 0.92);
+
+  /* Text */
+  --fixmi-text-primary: #fafafa;
+  --fixmi-text-secondary: #a1a1aa;
+  --fixmi-text-muted: #71717a;
+
+  /* Borders */
+  --fixmi-border: rgba(63, 63, 70, 0.5);
+  --fixmi-border-light: rgba(161, 161, 170, 0.15);
+
+  /* Gradient */
+  --fixmi-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+  --fixmi-gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%);
+}
+
+@theme inline {
+  --color-background: var(--fixmi-bg-primary);
+  --color-foreground: var(--fixmi-text-primary);
+  --color-primary: var(--fixmi-primary);
+  --color-primary-light: var(--fixmi-primary-light);
+  --color-primary-dark: var(--fixmi-primary-dark);
+  --color-accent: var(--fixmi-accent);
+  --color-accent-light: var(--fixmi-accent-light);
+  --color-surface: var(--fixmi-bg-secondary);
+  --color-surface-alt: var(--fixmi-bg-tertiary);
+  --color-text-secondary: var(--fixmi-text-secondary);
+  --color-text-muted: var(--fixmi-text-muted);
+  --color-border: var(--fixmi-border);
+  --color-border-light: var(--fixmi-border-light);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ============================
+   Base Styles
+   ============================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--fixmi-bg-primary);
+  color: var(--fixmi-text-primary);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ============================
+   Selection
+   ============================ */
+
+::selection {
+  background: rgba(99, 102, 241, 0.35);
+  color: #fafafa;
+}
+
+/* ============================
+   Scrollbar
+   ============================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* ============================
+   Utility Classes
+   ============================ */
+
+.fixmi-gradient-text {
+  background: var(--fixmi-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.fixmi-glass {
+  background: var(--fixmi-bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.fixmi-glass-strong {
+  background: var(--fixmi-bg-glass-strong);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+}
+
+.fixmi-glow {
+  box-shadow:
+    0 0 20px rgba(99, 102, 241, 0.15),
+    0 0 60px rgba(99, 102, 241, 0.08);
+}
+
+.fixmi-card {
+  background: var(--fixmi-bg-secondary);
+  border: 1px solid var(--fixmi-border);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fixmi-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(99, 102, 241, 0.06);
+  transform: translateY(-2px);
+}
