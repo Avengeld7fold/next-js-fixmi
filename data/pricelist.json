@@ -1,0 +1,176 @@
+{
+  "categories": [
+    {
+      "slug": "iphone",
+      "name": "iPhone",
+      "description": "Layanan restorasi presisi untuk seluruh lini iPhone — dari penggantian display OLED hingga micro-solder komponen logic board.",
+      "devices": [
+        {
+          "name": "iPhone 16 Pro Max",
+          "services": [
+            { "name": "Penggantian LCD OLED Original", "price": 4850000 },
+            { "name": "Baterai Health Restore (Original Cell)", "price": 750000 },
+            { "name": "Port Charging Micro-Solder", "price": 450000 },
+            { "name": "Kamera Belakang (Triple Lens Module)", "price": 2200000 },
+            { "name": "Kamera Depan + Face ID Recalibration", "price": 1100000 },
+            { "name": "Back Glass Replacement (Laser Remove)", "price": 950000 }
+          ]
+        },
+        {
+          "name": "iPhone 16 Pro",
+          "services": [
+            { "name": "Penggantian LCD OLED Original", "price": 4250000 },
+            { "name": "Baterai Health Restore (Original Cell)", "price": 700000 },
+            { "name": "Port Charging Micro-Solder", "price": 450000 },
+            { "name": "Kamera Belakang (Triple Lens Module)", "price": 2000000 },
+            { "name": "Kamera Depan + Face ID Recalibration", "price": 1000000 },
+            { "name": "Back Glass Replacement (Laser Remove)", "price": 850000 }
+          ]
+        },
+        {
+          "name": "iPhone 15 Pro Max",
+          "services": [
+            { "name": "Penggantian LCD OLED Original", "price": 3950000 },
+            { "name": "Baterai Health Restore (Original Cell)", "price": 650000 },
+            { "name": "Port Charging USB-C Module", "price": 400000 },
+            { "name": "Kamera Belakang (Triple Lens Module)", "price": 1800000 },
+            { "name": "Kamera Depan + Face ID Recalibration", "price": 950000 },
+            { "name": "Back Glass Replacement (Laser Remove)", "price": 800000 }
+          ]
+        },
+        {
+          "name": "iPhone 15",
+          "services": [
+            { "name": "Penggantian LCD OLED Original", "price": 2850000 },
+            { "name": "Baterai Health Restore (Original Cell)", "price": 550000 },
+            { "name": "Port Charging USB-C Module", "price": 350000 },
+            { "name": "Kamera Belakang (Dual Lens)", "price": 1200000 },
+            { "name": "Kamera Depan + Face ID Recalibration", "price": 850000 }
+          ]
+        },
+        {
+          "name": "iPhone 14 Pro Max",
+          "services": [
+            { "name": "Penggantian LCD OLED Original", "price": 3500000 },
+            { "name": "Baterai Health Restore (Original Cell)", "price": 550000 },
+            { "name": "Port Charging Lightning", "price": 350000 },
+            { "name": "Kamera Belakang (Triple Lens Module)", "price": 1600000 },
+            { "name": "Kamera Depan + Face ID Recalibration", "price": 900000 },
+            { "name": "Back Glass Replacement (Laser Remove)", "price": 750000 }
+          ]
+        },
+        {
+          "name": "iPhone 13",
+          "services": [
+            { "name": "Penggantian LCD OLED Original", "price": 2200000 },
+            { "name": "Baterai Health Restore (Original Cell)", "price": 450000 },
+            { "name": "Port Charging Lightning", "price": 300000 },
+            { "name": "Kamera Belakang (Dual Lens)", "price": 1000000 },
+            { "name": "Kamera Depan + Face ID Recalibration", "price": 750000 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "ipad",
+      "name": "iPad",
+      "description": "Restorasi tablet Apple dengan presisi tinggi — penggantian digitizer, baterai berkapasitas besar, dan rekalibrasi Apple Pencil pairing.",
+      "devices": [
+        {
+          "name": "iPad Pro M4 13\"",
+          "services": [
+            { "name": "Penggantian LCD + Digitizer Assembly", "price": 5500000 },
+            { "name": "Baterai High-Capacity Restore", "price": 1200000 },
+            { "name": "Port USB-C + Thunderbolt Module", "price": 650000 },
+            { "name": "Kamera Belakang + LiDAR Module", "price": 1500000 },
+            { "name": "Back Panel Replacement", "price": 1800000 }
+          ]
+        },
+        {
+          "name": "iPad Pro M2 11\"",
+          "services": [
+            { "name": "Penggantian LCD + Digitizer Assembly", "price": 4200000 },
+            { "name": "Baterai High-Capacity Restore", "price": 1000000 },
+            { "name": "Port USB-C Module", "price": 550000 },
+            { "name": "Kamera Belakang + LiDAR Module", "price": 1200000 }
+          ]
+        },
+        {
+          "name": "iPad Air M2",
+          "services": [
+            { "name": "Penggantian LCD + Digitizer Assembly", "price": 3200000 },
+            { "name": "Baterai High-Capacity Restore", "price": 850000 },
+            { "name": "Port USB-C Module", "price": 450000 },
+            { "name": "Kamera Belakang", "price": 800000 }
+          ]
+        },
+        {
+          "name": "iPad 10th Gen",
+          "services": [
+            { "name": "Penggantian LCD + Digitizer Assembly", "price": 2200000 },
+            { "name": "Baterai High-Capacity Restore", "price": 700000 },
+            { "name": "Port USB-C Module", "price": 400000 },
+            { "name": "Kamera Belakang", "price": 600000 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "android",
+      "name": "Android",
+      "description": "Perbaikan perangkat Android flagship — Samsung Galaxy, Google Pixel, dan Xiaomi dengan spare part original grade dan kalibrasi display.",
+      "devices": [
+        {
+          "name": "Samsung Galaxy S24 Ultra",
+          "services": [
+            { "name": "Penggantian Dynamic AMOLED 2X", "price": 4500000 },
+            { "name": "Baterai 5000mAh Restore", "price": 650000 },
+            { "name": "Port USB-C + S Pen Detection", "price": 500000 },
+            { "name": "Kamera Belakang (Quad Module 200MP)", "price": 2000000 },
+            { "name": "Back Glass Replacement", "price": 800000 }
+          ]
+        },
+        {
+          "name": "Samsung Galaxy S24",
+          "services": [
+            { "name": "Penggantian Dynamic AMOLED 2X", "price": 3200000 },
+            { "name": "Baterai 4000mAh Restore", "price": 500000 },
+            { "name": "Port USB-C Module", "price": 400000 },
+            { "name": "Kamera Belakang (Triple Module 50MP)", "price": 1400000 },
+            { "name": "Back Glass Replacement", "price": 650000 }
+          ]
+        },
+        {
+          "name": "Samsung Galaxy Z Fold 5",
+          "services": [
+            { "name": "Inner Foldable Display Replacement", "price": 6500000 },
+            { "name": "Outer Cover Display Replacement", "price": 2800000 },
+            { "name": "Hinge Mechanism Rebuild", "price": 1500000 },
+            { "name": "Baterai Dual-Cell Restore", "price": 800000 },
+            { "name": "Port USB-C Module", "price": 450000 }
+          ]
+        },
+        {
+          "name": "Google Pixel 9 Pro",
+          "services": [
+            { "name": "Penggantian LTPO OLED Display", "price": 3800000 },
+            { "name": "Baterai 5060mAh Restore", "price": 600000 },
+            { "name": "Port USB-C Module", "price": 400000 },
+            { "name": "Kamera Belakang (Triple Module + AI ISP)", "price": 1800000 },
+            { "name": "Back Glass Replacement", "price": 700000 }
+          ]
+        },
+        {
+          "name": "Xiaomi 14 Ultra",
+          "services": [
+            { "name": "Penggantian LTPO AMOLED C8", "price": 3500000 },
+            { "name": "Baterai 5300mAh Restore", "price": 550000 },
+            { "name": "Port USB-C Module", "price": 350000 },
+            { "name": "Kamera Leica Quad Module", "price": 2200000 },
+            { "name": "Back Glass + Leica Ring Replace", "price": 900000 }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -93,7 +93,7 @@ p {
    ============================ */
 
 ::selection {
-  background: rgba(37, 99, 235, 0.35); /* Accent blue highlight */
+  background: oklch(62.7% 0.22 41 / 0.3); /* Orange primary highlight */
   color: var(--fixmi-text-primary);
 }
 
@@ -110,12 +110,12 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: oklch(35% 0.05 255 / 0.4);
+  background: oklch(35% 0.05 41 / 0.4);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(62% 0.20 255 / 0.5);
+  background: oklch(62.7% 0.22 41 / 0.5);
 }
 
 /* ============================
