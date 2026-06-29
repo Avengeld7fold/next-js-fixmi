@@ -1,37 +1,33 @@
 @import "tailwindcss";
 
 /* ============================
-   FIXMI Design System
-   Premium Dark Mode Theme
+   FIXMI Precision Design System
+   Instrument Grade theme
    ============================ */
 
 :root {
-  /* Brand Colors */
-  --fixmi-primary: #6366f1;
-  --fixmi-primary-light: #818cf8;
-  --fixmi-primary-dark: #4f46e5;
-  --fixmi-accent: #06b6d4;
-  --fixmi-accent-light: #22d3ee;
+  /* Brand Colors (OKLCH) */
+  --fixmi-primary: oklch(62% 0.20 255);        /* Clinical Cobalt Blue */
+  --fixmi-primary-light: oklch(70% 0.17 255);  /* Hover State Blue */
+  --fixmi-primary-dark: oklch(50% 0.22 255);   /* Dark diagnostics blue */
+  --fixmi-accent: oklch(74% 0.16 195);         /* Cyan laser alignment line */
+  --fixmi-accent-light: oklch(82% 0.12 195);
 
-  /* Neutral Palette */
-  --fixmi-bg-primary: #09090b;
-  --fixmi-bg-secondary: #18181b;
-  --fixmi-bg-tertiary: #27272a;
-  --fixmi-bg-glass: rgba(24, 24, 27, 0.72);
-  --fixmi-bg-glass-strong: rgba(24, 24, 27, 0.92);
+  /* Neutral Palette - Slate Metallic Tone */
+  --fixmi-bg-primary: oklch(12% 0.005 240);    /* Pure Slate Charcoal */
+  --fixmi-bg-secondary: oklch(16% 0.006 240);  /* Dark instrument frame */
+  --fixmi-bg-tertiary: oklch(20% 0.007 240);   /* Secondary panel */
+  --fixmi-bg-glass: rgba(15, 17, 21, 0.75);    /* Precision Glass */
+  --fixmi-bg-glass-strong: rgba(15, 17, 21, 0.92);
 
-  /* Text */
-  --fixmi-text-primary: #fafafa;
-  --fixmi-text-secondary: #a1a1aa;
-  --fixmi-text-muted: #71717a;
+  /* Text & Ink values */
+  --fixmi-text-primary: oklch(95% 0.003 240);  /* Pristine Titanium White */
+  --fixmi-text-secondary: oklch(70% 0.008 240);/* Clean grey text */
+  --fixmi-text-muted: oklch(48% 0.008 240);    /* Calibrated legend info */
 
   /* Borders */
-  --fixmi-border: rgba(63, 63, 70, 0.5);
-  --fixmi-border-light: rgba(161, 161, 170, 0.15);
-
-  /* Gradient */
-  --fixmi-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
-  --fixmi-gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%);
+  --fixmi-border: oklch(22% 0.01 240);         /* Instrument hairline border */
+  --fixmi-border-light: rgba(161, 161, 170, 0.12);
 }
 
 @theme inline {
@@ -48,8 +44,9 @@
   --color-text-muted: var(--fixmi-text-muted);
   --color-border: var(--fixmi-border);
   --color-border-light: var(--fixmi-border-light);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
 }
 
 /* ============================
@@ -76,12 +73,28 @@ body {
 }
 
 /* ============================
+   Typography calibration (Impeccable rules)
+   ============================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em; /* Display letter-spacing must be >= -0.04em */
+  text-wrap: balance;
+}
+
+p {
+  max-width: 72ch; /* Cap body line length at 65-75ch */
+  text-wrap: pretty;
+}
+
+/* ============================
    Selection
    ============================ */
 
 ::selection {
-  background: rgba(99, 102, 241, 0.35);
-  color: #fafafa;
+  background: rgba(37, 99, 235, 0.35); /* Accent blue highlight */
+  color: var(--fixmi-text-primary);
 }
 
 /* ============================
@@ -89,7 +102,7 @@ body {
    ============================ */
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -97,54 +110,52 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.3);
+  background: oklch(35% 0.05 255 / 0.4);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5);
+  background: oklch(62% 0.20 255 / 0.5);
 }
 
 /* ============================
    Utility Classes
    ============================ */
 
-.fixmi-gradient-text {
-  background: var(--fixmi-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 .fixmi-glass {
   background: var(--fixmi-bg-glass);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .fixmi-glass-strong {
   background: var(--fixmi-bg-glass-strong);
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.fixmi-glow {
-  box-shadow:
-    0 0 20px rgba(99, 102, 241, 0.15),
-    0 0 60px rgba(99, 102, 241, 0.08);
-}
-
+/* 
+   Hairline precision card - no soft drop shadows 
+   Max card border radius is 12px 
+*/
 .fixmi-card {
   background: var(--fixmi-bg-secondary);
   border: 1px solid var(--fixmi-border);
-  border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  transition: border-color 0.2s ease-out, background-color 0.2s ease-out;
 }
 
 .fixmi-card:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.3),
-    0 0 40px rgba(99, 102, 241, 0.06);
-  transform: translateY(-2px);
+  border-color: var(--fixmi-primary);
+  background: var(--fixmi-bg-tertiary);
+}
+
+/* Reduced Motion implementation */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

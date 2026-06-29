@@ -52,10 +52,10 @@ export default function Navbar() {
     <header
       className={`
         fixed top-0 left-0 right-0 z-50
-        transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+        transition-all duration-300 ease-out
         ${
           isScrolled
-            ? "fixmi-glass-strong border-b border-border-light shadow-lg shadow-black/20"
+            ? "fixmi-glass-strong border-b border-border shadow-md"
             : "bg-transparent border-b border-transparent"
         }
       `}
@@ -65,17 +65,17 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="group relative flex items-center gap-2"
+            className="group relative flex items-center gap-3"
           >
-            {/* Logo icon */}
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
+            {/* Logo icon - Clinical Diagnostic Style */}
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-primary bg-surface shadow-sm transition-colors duration-200 group-hover:bg-surface-alt">
               <svg
-                width="18"
-                height="18"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="text-white"
+                className="text-primary transition-transform duration-300 group-hover:rotate-12"
               >
                 <path
                   d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
@@ -86,15 +86,15 @@ export default function Navbar() {
                 />
               </svg>
             </div>
-            {/* Logo text */}
-            <span className="text-xl font-bold tracking-tight">
-              <span className="fixmi-gradient-text">FIX</span>
+            {/* Logo text - Technical Font */}
+            <span className="font-display text-lg font-bold tracking-tight uppercase">
+              <span className="text-primary">FIX</span>
               <span className="text-foreground">MI</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href ||
                 (link.href !== "/" && pathname.startsWith(link.href));
@@ -103,35 +103,31 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={`
-                    relative px-4 py-2 text-sm font-medium rounded-lg
-                    transition-all duration-300 ease-out
+                    relative px-4 py-2 text-sm font-medium rounded-md
+                    transition-colors duration-200
                     ${
                       isActive
-                        ? "text-primary-light"
+                        ? "text-primary"
                         : "text-text-secondary hover:text-foreground"
                     }
                   `}
                 >
                   {link.label}
-                  {/* Active indicator dot */}
+                  {/* Precise active underline indicator instead of floating dots */}
                   {isActive && (
-                    <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary-light shadow-[0_0_8px_rgba(129,140,248,0.6)]" />
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary" />
                   )}
                 </Link>
               );
             })}
-            {/* CTA Button */}
+            {/* Technical solid Cobalt Blue button */}
             <Link
               href="/pricelist"
               className="
-                ml-4 inline-flex items-center gap-2 rounded-xl
-                bg-gradient-to-r from-primary to-accent
-                px-5 py-2.5 text-sm font-semibold text-white
-                shadow-lg shadow-primary/25
-                transition-all duration-300 ease-out
-                hover:shadow-xl hover:shadow-primary/30
-                hover:brightness-110
-                active:scale-[0.97]
+                ml-4 inline-flex items-center gap-2 rounded-md
+                bg-primary px-5 py-2 text-sm font-semibold text-white
+                transition-all duration-200 ease-out
+                hover:bg-primary-light active:scale-[0.98]
               "
             >
               Cek Harga
@@ -160,19 +156,19 @@ export default function Navbar() {
           >
             <div className="flex h-5 w-5 flex-col items-center justify-center gap-[5px]">
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-200 ${
                   isMobileMenuOpen
                     ? "translate-y-[7px] rotate-45"
                     : ""
                 }`}
               />
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-200 ${
                   isMobileMenuOpen ? "opacity-0 scale-0" : ""
                 }`}
               />
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-200 ${
                   isMobileMenuOpen
                     ? "-translate-y-[7px] -rotate-45"
                     : ""
@@ -187,7 +183,7 @@ export default function Navbar() {
       <div
         className={`
           fixed inset-0 z-40 md:hidden
-          transition-all duration-500
+          transition-all duration-300
           ${
             isMobileMenuOpen
               ? "visible opacity-100"
@@ -197,15 +193,15 @@ export default function Navbar() {
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
         {/* Menu Panel */}
         <div
           className={`
             absolute top-0 right-0 h-full w-[280px]
-            fixmi-glass-strong border-l border-border-light
-            transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+            bg-surface border-l border-border
+            transition-transform duration-300 ease-out
             ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
           `}
         >
@@ -219,11 +215,11 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`
-                    rounded-xl px-4 py-3 text-base font-medium
-                    transition-all duration-300
+                    rounded-md px-4 py-3 text-base font-medium
+                    transition-colors duration-200
                     ${
                       isActive
-                        ? "bg-primary/10 text-primary-light"
+                        ? "bg-surface-alt text-primary"
                         : "text-text-secondary hover:bg-surface-alt hover:text-foreground"
                     }
                   `}
@@ -232,17 +228,15 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <div className="my-3 h-px bg-border-light" />
+            <div className="my-3 h-px bg-border" />
             <Link
               href="/pricelist"
               onClick={() => setIsMobileMenuOpen(false)}
               className="
-                flex items-center justify-center gap-2 rounded-xl
-                bg-gradient-to-r from-primary to-accent
-                px-5 py-3 text-base font-semibold text-white
-                shadow-lg shadow-primary/25
-                transition-all duration-300
-                active:scale-[0.97]
+                flex items-center justify-center gap-2 rounded-md
+                bg-primary px-5 py-3 text-base font-semibold text-white
+                transition-all duration-200
+                hover:bg-primary-light active:scale-[0.98]
               "
             >
               Cek Harga
