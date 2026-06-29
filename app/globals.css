@@ -7,11 +7,11 @@
 
 :root {
   /* Brand Colors (OKLCH) */
-  --fixmi-primary: oklch(62% 0.20 255);        /* Clinical Cobalt Blue */
-  --fixmi-primary-light: oklch(70% 0.17 255);  /* Hover State Blue */
-  --fixmi-primary-dark: oklch(50% 0.22 255);   /* Dark diagnostics blue */
-  --fixmi-accent: oklch(74% 0.16 195);         /* Cyan laser alignment line */
-  --fixmi-accent-light: oklch(82% 0.12 195);
+  --fixmi-primary: oklch(62.7% 0.22 41);       /* Clinical Diagnostic Orange (#f26a21) */
+  --fixmi-primary-light: oklch(68% 0.23 41);   /* Hover State Orange (#ff7f39) */
+  --fixmi-primary-dark: oklch(55% 0.21 41);    /* Compressed active orange (#cf550d) */
+  --fixmi-accent: oklch(70% 0.14 55);          /* Copper wire accent tone */
+  --fixmi-accent-light: oklch(78% 0.10 55);
 
   /* Neutral Palette - Slate Metallic Tone */
   --fixmi-bg-primary: oklch(12% 0.005 240);    /* Pure Slate Charcoal */

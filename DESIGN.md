@@ -15,8 +15,9 @@ We use a "Technical Diagnostic Instrument" color scheme: slate grays, cold titan
 --text-secondary: oklch(70% 0.008 240)    /* Clinical Gray (~#a1a1aa) */
 --text-muted:     oklch(45% 0.008 240)    /* Dark Spec Muted (~#52525b) */
 
---accent-primary: oklch(62% 0.20 255)     /* Diagnostics Cobalt Blue (~#2563eb) */
---accent-hover:   oklch(68% 0.22 255)     /* Lighter active blue (~#3b82f6) */
+--accent-primary: oklch(62.7% 0.22 41)    /* Diagnostics Orange (~#f26a21) */
+--accent-hover:   oklch(68% 0.23 41)      /* Glowing active orange (~#ff7f39) */
+--accent-dark:    oklch(55% 0.21 41)      /* Compressed active orange (~#cf550d) */
 ```
 
 ## Typography
