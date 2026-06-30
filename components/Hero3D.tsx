@@ -59,7 +59,7 @@ function DeviceModel() {
       <Center>
         <primitive
           object={scene}
-          scale={3.0} // Adjust scale for Phone 17 Pro Max Simple.glb
+          scale={4.5} // Adjust scale for Phone 17 Pro Max Simple.glb
           rotation={[0, Math.PI / 1.1, 0]} // Present default angled view
         />
       </Center>
