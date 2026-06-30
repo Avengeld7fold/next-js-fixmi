@@ -13,21 +13,27 @@ export default function Home() {
   const captionRef = useRef<HTMLParagraphElement>(null);
 
   useGSAP(() => {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1.6 } });
+    if (!leftTitleRef.current || !rightTitle1Ref.current || !rightTitle2Ref.current || !captionRef.current) return;
+    const leftLines = leftTitleRef.current.querySelectorAll(".line-anim");
 
-    tl.fromTo(leftTitleRef.current,
-      { opacity: 0, y: 50, filter: "blur(12px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)" }
+    const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 1.5 } });
+
+    // 1. Left Title lines (HP KAMU -> RUSAK?)
+    tl.fromTo(leftLines,
+      { opacity: 0, y: 35 },
+      { opacity: 1, y: 0, stagger: 0.3 }
     )
+    // 2. Right Title lines (FIXMI BALI -> SOLUSINYA!)
     .fromTo([rightTitle1Ref.current, rightTitle2Ref.current],
-      { opacity: 0, y: 50, filter: "blur(12px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)" },
-      "-=1.1"
+      { opacity: 0, y: 35 },
+      { opacity: 1, y: 0, stagger: 0.3 },
+      "-=0.9"
     )
+    // 3. Caption (YOUR TRUSTED...)
     .fromTo(captionRef.current,
-      { opacity: 0, y: 25, filter: "blur(8px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)" },
-      "-=1.1"
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0 },
+      "-=0.9"
     );
   });
 
@@ -58,13 +64,10 @@ export default function Home() {
                   color: "var(--fixmi-primary)",
                   textTransform: "uppercase" as const,
                   margin: 0,
-                  opacity: 0,
-                  filter: "blur(12px)",
                 }}
               >
-                HP KAMU
-                <br />
-                RUSAK?
+                <span className="block line-anim" style={{ opacity: 0 }}>HP KAMU</span>
+                <span className="block line-anim" style={{ opacity: 0 }}>RUSAK?</span>
               </h1>
             </div>
 
@@ -89,7 +92,6 @@ export default function Home() {
                     lineHeight: 1.4,
                     marginBottom: "20px", // raised to align with the bottom of FIXMI BALI
                     opacity: 0,
-                    filter: "blur(8px)",
                   }}
                   className="text-center lg:text-right"
                 >
@@ -112,7 +114,6 @@ export default function Home() {
                     margin: 0,
                     whiteSpace: "nowrap",
                     opacity: 0,
-                    filter: "blur(12px)",
                   }}
                 >
                   FIXMI BALI
@@ -132,7 +133,6 @@ export default function Home() {
                   textTransform: "uppercase" as const,
                   margin: 0,
                   opacity: 0,
-                  filter: "blur(12px)",
                 }}
               >
                 SOLUSINYA!
