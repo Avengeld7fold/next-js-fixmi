@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
@@ -18,6 +19,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const neueMontreal = localFont({
+  src: [
+    {
+      path: "../public/fonts/neue-montreal/NeueMontreal-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/neue-montreal/NeueMontreal-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/neue-montreal/NeueMontreal-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/neue-montreal/NeueMontreal-Italic.otf",
+      weight: "400",
+      style: "italic",
+    },
+  ],
+  variable: "--font-neue-montreal",
+});
+
 export const metadata: Metadata = {
   title: "FIXMI — Smart Device Repair Service",
   description:
@@ -33,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} ${neueMontreal.variable} h-full antialiased`}
       data-scroll-behavior="smooth"
     >
       <head>

@@ -46,8 +46,8 @@
   --color-text-muted: var(--fixmi-text-muted);
   --color-border: var(--fixmi-border);
   --color-border-light: var(--fixmi-border-light);
-  --font-display: var(--font-space-grotesk);
-  --font-sans: var(--font-inter);
+  --font-display: var(--font-neue-montreal);
+  --font-sans: var(--font-neue-montreal);
   --font-mono: var(--font-mono);
 }
 
