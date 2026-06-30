@@ -163,10 +163,323 @@ p {
 }
 
 /* ============================
-   Navbar — Reference Design
+   Navbar — Reference Precision Design
+   Font: PP Neue Montreal
    ============================ */
 
-.navbar-header {
-  background: oklch(15% 0.005 240);
-  border-bottom: 1px solid var(--fixmi-border);
+@font-face {
+  font-family: 'Neue Montreal';
+  src: local('PP Neue Montreal'),
+       local('PPNeueMontreal-Medium'),
+       local('Neue Montreal');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
+
+/* ---- Header Shell ---- */
+.navbar-header {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+  background: #ede8de;
+  border-bottom: 1px solid #d9d3c7;
+}
+
+/* ---- Orange Reveal Strip ---- */
+.navbar-reveal-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: var(--fixmi-primary);
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.navbar-reveal-strip--active {
+  opacity: 1;
+}
+
+/* ---- Nav Container ---- */
+.navbar-nav {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 72px;
+}
+
+/* ---- Logo ---- */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar-logo-icon {
+  color: var(--fixmi-primary);
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover .navbar-logo-icon {
+  transform: rotate(12deg);
+}
+
+.navbar-logo-text {
+  font-family: 'Neue Montreal', var(--font-display), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--fixmi-primary);
+  line-height: 1;
+}
+
+/* ---- Desktop Menu ---- */
+.navbar-menu {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .navbar-menu {
+    display: flex;
+  }
+}
+
+.navbar-menu-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  font-family: 'Neue Montreal', var(--font-display), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--fixmi-primary);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar-menu-link:hover {
+  color: var(--fixmi-primary-dark);
+}
+
+/* White underline — animates left to right */
+.navbar-menu-underline {
+  position: absolute;
+  bottom: 2px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.navbar-menu-link:hover .navbar-menu-underline {
+  transform: scaleX(1);
+}
+
+.navbar-menu-link--active .navbar-menu-underline {
+  transform: scaleX(1);
+}
+
+/* ---- CTA Button (BOOK NOW) ---- */
+.navbar-cta-wrapper {
+  display: none;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .navbar-cta-wrapper {
+    display: flex;
+  }
+}
+
+.navbar-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-family: 'Neue Montreal', var(--font-display), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  background: var(--fixmi-primary);
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.3s ease-out, background-color 0.2s ease;
+  transform: translateY(0);
+}
+
+.navbar-cta--hovered {
+  transform: translateY(6px);
+  background: var(--fixmi-primary-light);
+}
+
+/* ---- Mobile Hamburger ---- */
+.navbar-hamburger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .navbar-hamburger {
+    display: none;
+  }
+}
+
+.navbar-hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--fixmi-primary);
+  transition: all 0.3s ease;
+}
+
+.navbar-hamburger-line--top-open {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.navbar-hamburger-line--mid-open {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.navbar-hamburger-line--bot-open {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* ---- Mobile Overlay ---- */
+.navbar-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .navbar-mobile-overlay {
+    display: none;
+  }
+}
+
+.navbar-mobile-overlay--open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.navbar-mobile-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.navbar-mobile-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 320px;
+  background: #ede8de;
+  border-left: 1px solid #d9d3c7;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.navbar-mobile-panel--open {
+  transform: translateX(0);
+}
+
+.navbar-mobile-content {
+  display: flex;
+  flex-direction: column;
+  padding: 96px 32px 32px;
+}
+
+.navbar-mobile-link {
+  display: block;
+  padding: 14px 4px;
+  font-family: 'Neue Montreal', var(--font-display), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #5a5548;
+  text-decoration: none;
+  text-transform: uppercase;
+  border-bottom: 1px solid #d9d3c7;
+  transition: color 0.2s ease;
+}
+
+.navbar-mobile-link:hover {
+  color: var(--fixmi-primary);
+}
+
+.navbar-mobile-link--active {
+  color: var(--fixmi-primary);
+}
+
+.navbar-mobile-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: transparent;
+}
+
+.navbar-mobile-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  font-family: 'Neue Montreal', var(--font-display), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  background: var(--fixmi-primary);
+  border-radius: 6px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+}
+
+.navbar-mobile-cta:hover {
+  background: var(--fixmi-primary-light);
+}
+
