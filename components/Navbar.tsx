@@ -92,7 +92,7 @@ export default function Navbar() {
           </svg>
           <span
             style={{
-              fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+              fontFamily: "var(--font-neue-montreal), sans-serif",
               fontSize: "20px",
               fontWeight: 800,
               letterSpacing: "0.02em",
@@ -117,7 +117,7 @@ export default function Navbar() {
                   className="group relative inline-flex items-center no-underline whitespace-nowrap"
                   style={{
                     padding: "8px 20px",
-                    fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                    fontFamily: "var(--font-neue-montreal), sans-serif",
                     fontSize: "13px",
                     fontWeight: 500,
                     letterSpacing: "0.1em",
@@ -150,7 +150,7 @@ export default function Navbar() {
               top: 0,
               height: "64px",
               padding: "0 28px",
-              fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+              fontFamily: "var(--font-neue-montreal), sans-serif",
               fontSize: "13px",
               fontWeight: 700,
               letterSpacing: "0.1em",
@@ -273,7 +273,7 @@ export default function Navbar() {
                   className="block no-underline transition-colors duration-200"
                   style={{
                     padding: "14px 4px",
-                    fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                    fontFamily: "var(--font-neue-montreal), sans-serif",
                     fontSize: "13px",
                     fontWeight: 600,
                     letterSpacing: "0.1em",
@@ -292,7 +292,7 @@ export default function Navbar() {
               className="flex items-center justify-center no-underline mt-6 transition-colors duration-200"
               style={{
                 padding: "14px 24px",
-                fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                fontFamily: "var(--font-neue-montreal), sans-serif",
                 fontSize: "13px",
                 fontWeight: 700,
                 letterSpacing: "0.1em",
