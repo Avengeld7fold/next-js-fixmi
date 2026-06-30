@@ -42,7 +42,7 @@ export default function Navbar() {
   return (
     <header
       className="relative z-50 w-full"
-      style={{ background: "#ede8de", borderBottom: "1px solid #d9d3c7" }}
+      style={{ background: "var(--fixmi-bg-glass)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--fixmi-border)" }}
     >
       {/* Orange reveal strip — appears behind BOOK NOW on hover */}
       <div
@@ -199,8 +199,10 @@ export default function Navbar() {
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
           style={{
-            background: "#ede8de",
-            borderLeft: "1px solid #d9d3c7",
+            background: "var(--fixmi-bg-glass-strong)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderLeft: "1px solid var(--fixmi-border)",
           }}
         >
           <div className="flex flex-col" style={{ padding: "96px 32px 32px" }}>
@@ -220,9 +222,9 @@ export default function Navbar() {
                     fontSize: "13px",
                     fontWeight: 600,
                     letterSpacing: "0.1em",
-                    color: isActive ? "var(--fixmi-primary)" : "#5a5548",
+                    color: isActive ? "var(--fixmi-primary)" : "var(--fixmi-text-secondary)",
                     textTransform: "uppercase" as const,
-                    borderBottom: "1px solid #d9d3c7",
+                    borderBottom: "1px solid var(--fixmi-border)",
                   }}
                 >
                   {link.label}
