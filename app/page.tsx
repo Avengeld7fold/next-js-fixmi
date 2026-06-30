@@ -12,7 +12,7 @@ export default function Home() {
           <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-accent/4 blur-[100px]" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 md:px-12 lg:px-16 py-16 lg:py-0">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-8 md:px-12 lg:px-16 py-16 lg:py-0">
           {/* 3-Column Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0">
 

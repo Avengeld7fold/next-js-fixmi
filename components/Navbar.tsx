@@ -62,7 +62,7 @@ export default function Navbar() {
       <nav
         className="relative z-10 flex items-center justify-between w-full"
         style={{
-          maxWidth: "1440px",
+          maxWidth: "1600px",
           marginLeft: "auto",
           marginRight: "auto",
           paddingLeft: "2rem",
