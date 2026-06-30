@@ -42,7 +42,7 @@ export default function Navbar() {
   return (
     <header
       className="relative z-50 w-full"
-      style={{ background: "var(--fixmi-bg-primary)", borderBottom: "1px solid var(--fixmi-border)" }}
+      style={{ background: "var(--fixmi-bg-primary)" }}
     >
       {/* Orange reveal strip — appears behind BOOK NOW on hover */}
       <div
