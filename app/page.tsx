@@ -19,7 +19,7 @@ export default function Home() {
             {/* Left Column — Big Title */}
             <div className="lg:col-span-4 flex flex-col justify-start items-center lg:items-start text-center lg:text-left lg:self-start lg:-mt-[120px]">
               <h1
-                className="text-[64px] md:text-[120px] lg:text-[200px]"
+                className="text-[64px] md:text-[120px] lg:text-[150px]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
                   fontWeight: 400,
@@ -65,7 +65,7 @@ export default function Home() {
                   SERVICE!
                 </p>
                 <h2
-                  className="text-[64px] md:text-[120px] lg:text-[200px]"
+                  className="text-[64px] md:text-[120px] lg:text-[150px]"
                   style={{
                     fontFamily: "var(--font-bayon), sans-serif",
                     fontWeight: 400,
@@ -82,7 +82,7 @@ export default function Home() {
 
               {/* Remaining parts of title */}
               <h2
-                className="text-[64px] md:text-[120px] lg:text-[200px]"
+                className="text-[64px] md:text-[120px] lg:text-[150px]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
                   fontWeight: 400,
