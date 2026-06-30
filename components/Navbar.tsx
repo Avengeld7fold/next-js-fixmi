@@ -40,25 +40,34 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className="navbar-header">
-      {/* Orange reveal strip — hidden behind BOOK NOW, revealed on hover */}
+    <header
+      className="relative z-50 w-full"
+      style={{ background: "#ede8de", borderBottom: "1px solid #d9d3c7" }}
+    >
+      {/* Orange reveal strip — appears behind BOOK NOW on hover */}
       <div
-        className={`
-          navbar-reveal-strip
-          ${isBookNowHovered ? "navbar-reveal-strip--active" : ""}
-        `}
+        className="absolute top-0 left-0 right-0 h-full pointer-events-none transition-opacity duration-300"
+        style={{
+          background: "var(--fixmi-primary)",
+          opacity: isBookNowHovered ? 1 : 0,
+          zIndex: 0,
+        }}
       />
 
-      <nav className="navbar-nav">
+      <nav
+        className="relative z-10 mx-auto flex items-center justify-between"
+        style={{ maxWidth: "1280px", padding: "0 40px", height: "72px" }}
+      >
         {/* Logo — Left */}
-        <Link href="/" className="navbar-logo group">
+        <Link href="/" className="group flex items-center gap-2.5 no-underline shrink-0">
           <svg
             width="26"
             height="26"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="navbar-logo-icon"
+            className="transition-transform duration-300 group-hover:rotate-12"
+            style={{ color: "var(--fixmi-primary)" }}
           >
             <path
               d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
@@ -68,11 +77,22 @@ export default function Navbar() {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="navbar-logo-text">FIXMI</span>
+          <span
+            style={{
+              fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+              fontSize: "20px",
+              fontWeight: 800,
+              letterSpacing: "0.02em",
+              color: "var(--fixmi-primary)",
+              lineHeight: 1,
+            }}
+          >
+            FIXMI
+          </span>
         </Link>
 
         {/* Desktop Menu — Center */}
-        <ul className="navbar-menu">
+        <ul className="hidden lg:flex items-center gap-2 list-none m-0 p-0">
           {NAV_LINKS.map((link) => {
             const isActive =
               pathname === link.href ||
@@ -81,21 +101,50 @@ export default function Navbar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`navbar-menu-link ${isActive ? "navbar-menu-link--active" : ""}`}
+                  className="group relative inline-flex items-center no-underline whitespace-nowrap"
+                  style={{
+                    padding: "8px 20px",
+                    fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    letterSpacing: "0.1em",
+                    color: "var(--fixmi-primary)",
+                    textTransform: "uppercase" as const,
+                  }}
                 >
                   {link.label}
-                  <span className="navbar-menu-underline" />
+                  {/* White underline — animates left to right on hover */}
+                  <span
+                    className={`
+                      absolute bottom-0.5 left-5 right-5 h-[2px] 
+                      transition-transform duration-300 ease-out origin-left
+                      ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}
+                    `}
+                    style={{ background: "#ffffff" }}
+                  />
                 </Link>
               </li>
             );
           })}
         </ul>
 
-        {/* CTA — Right */}
-        <div className="navbar-cta-wrapper">
+        {/* CTA — Right (Desktop) */}
+        <div className="hidden lg:flex items-center shrink-0">
           <Link
             href="/contact"
-            className={`navbar-cta ${isBookNowHovered ? "navbar-cta--hovered" : ""}`}
+            className="inline-flex items-center justify-center no-underline transition-all duration-300"
+            style={{
+              padding: "12px 28px",
+              fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+              fontSize: "13px",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              color: "#ffffff",
+              background: "var(--fixmi-primary)",
+              borderRadius: "6px",
+              textTransform: "uppercase" as const,
+              transform: isBookNowHovered ? "translateY(6px)" : "translateY(0)",
+            }}
             onMouseEnter={() => setIsBookNowHovered(true)}
             onMouseLeave={() => setIsBookNowHovered(false)}
           >
@@ -107,24 +156,54 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-          className="navbar-hamburger"
+          className="flex flex-col items-center justify-center gap-[6px] w-11 h-11 p-0 border-none bg-transparent cursor-pointer lg:hidden"
           aria-label="Toggle navigation menu"
           aria-expanded={isMobileMenuOpen}
         >
-          <span className={`navbar-hamburger-line ${isMobileMenuOpen ? "navbar-hamburger-line--top-open" : ""}`} />
-          <span className={`navbar-hamburger-line ${isMobileMenuOpen ? "navbar-hamburger-line--mid-open" : ""}`} />
-          <span className={`navbar-hamburger-line ${isMobileMenuOpen ? "navbar-hamburger-line--bot-open" : ""}`} />
+          <span
+            className={`block w-6 h-[2px] rounded-full transition-all duration-300 ${
+              isMobileMenuOpen ? "translate-y-[8px] rotate-45" : ""
+            }`}
+            style={{ background: "var(--fixmi-primary)" }}
+          />
+          <span
+            className={`block w-6 h-[2px] rounded-full transition-all duration-300 ${
+              isMobileMenuOpen ? "opacity-0 scale-0" : ""
+            }`}
+            style={{ background: "var(--fixmi-primary)" }}
+          />
+          <span
+            className={`block w-6 h-[2px] rounded-full transition-all duration-300 ${
+              isMobileMenuOpen ? "-translate-y-[8px] -rotate-45" : ""
+            }`}
+            style={{ background: "var(--fixmi-primary)" }}
+          />
         </button>
       </nav>
 
       {/* Mobile Menu Overlay */}
-      <div className={`navbar-mobile-overlay ${isMobileMenuOpen ? "navbar-mobile-overlay--open" : ""}`}>
+      <div
+        className={`fixed inset-0 z-40 lg:hidden transition-all duration-300 ${
+          isMobileMenuOpen ? "visible opacity-100" : "invisible opacity-0"
+        }`}
+      >
+        {/* Backdrop */}
         <div
-          className="navbar-mobile-backdrop"
+          className="absolute inset-0 backdrop-blur-sm"
+          style={{ background: "rgba(0,0,0,0.6)" }}
           onClick={() => setIsMobileMenuOpen(false)}
         />
-        <div className={`navbar-mobile-panel ${isMobileMenuOpen ? "navbar-mobile-panel--open" : ""}`}>
-          <div className="navbar-mobile-content">
+        {/* Panel */}
+        <div
+          className={`absolute top-0 right-0 h-full w-full max-w-[320px] transition-transform duration-300 ease-out ${
+            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+          style={{
+            background: "#ede8de",
+            borderLeft: "1px solid #d9d3c7",
+          }}
+        >
+          <div className="flex flex-col" style={{ padding: "96px 32px 32px" }}>
             {NAV_LINKS.map((link) => {
               const isActive =
                 pathname === link.href ||
@@ -134,17 +213,37 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`navbar-mobile-link ${isActive ? "navbar-mobile-link--active" : ""}`}
+                  className="block no-underline transition-colors duration-200"
+                  style={{
+                    padding: "14px 4px",
+                    fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    color: isActive ? "var(--fixmi-primary)" : "#5a5548",
+                    textTransform: "uppercase" as const,
+                    borderBottom: "1px solid #d9d3c7",
+                  }}
                 >
                   {link.label}
                 </Link>
               );
             })}
-            <div className="navbar-mobile-divider" />
             <Link
               href="/contact"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="navbar-mobile-cta"
+              className="flex items-center justify-center no-underline mt-6 transition-colors duration-200"
+              style={{
+                padding: "14px 24px",
+                fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                fontSize: "13px",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                color: "#ffffff",
+                background: "var(--fixmi-primary)",
+                borderRadius: "6px",
+                textTransform: "uppercase" as const,
+              }}
             >
               BOOK NOW
             </Link>
