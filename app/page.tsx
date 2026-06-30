@@ -16,24 +16,24 @@ export default function Home() {
     if (!leftTitleRef.current || !rightTitle1Ref.current || !rightTitle2Ref.current || !captionRef.current) return;
     const leftLines = leftTitleRef.current.querySelectorAll(".line-anim");
 
-    const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 1.5 } });
+    const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.8 } });
 
     // 1. Left Title lines (HP KAMU -> RUSAK?)
     tl.fromTo(leftLines,
-      { opacity: 0, y: 35 },
-      { opacity: 1, y: 0, stagger: 0.3 }
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, stagger: 0.25 }
     )
     // 2. Right Title lines (FIXMI BALI -> SOLUSINYA!)
     .fromTo([rightTitle1Ref.current, rightTitle2Ref.current],
-      { opacity: 0, y: 35 },
-      { opacity: 1, y: 0, stagger: 0.3 },
-      "-=0.9"
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, stagger: 0.25 },
+      "-=1.3"
     )
     // 3. Caption (YOUR TRUSTED...)
     .fromTo(captionRef.current,
-      { opacity: 0, y: 15 },
+      { opacity: 0, y: 10 },
       { opacity: 1, y: 0 },
-      "-=0.9"
+      "-=1.3"
     );
   });
 
