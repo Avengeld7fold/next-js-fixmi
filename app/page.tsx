@@ -65,7 +65,7 @@ export default function Home() {
                   SERVICE!
                 </p>
                 <h2
-                  className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
+                  className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)] whitespace-nowrap"
                   style={{
                     fontFamily: "var(--font-bayon), sans-serif",
                     fontWeight: 400,
