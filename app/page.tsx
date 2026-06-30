@@ -1,4 +1,5 @@
 import Hero3D from "@/components/Hero3D";
+import ScrollSequence from "@/components/ScrollSequence";
 
 export default function Home() {
   return (
@@ -86,17 +87,8 @@ export default function Home() {
       </section>
 
       {/* Scroll Sequence Section */}
-      <section id="scroll-section" className="relative min-h-screen bg-surface border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 py-32">
-          <div className="text-center">
-            <h2 className="mb-4 font-display text-3xl font-bold md:text-5xl">
-              Scroll Storytelling
-            </h2>
-            <p className="mx-auto max-w-[65ch] text-base text-text-secondary">
-              Bagian ini akan diintegrasikan dengan komponen <code className="font-mono text-primary text-sm px-1.5 py-0.5 rounded bg-surface-alt border border-border">ScrollSequence.tsx</code> pada Phase 4 menggunakan GSAP ScrollTrigger dan HTML5 Canvas rendering.
-            </p>
-          </div>
-        </div>
+      <section id="scroll-section" className="relative border-t border-border">
+        <ScrollSequence />
       </section>
 
       {/* Why FIXMI Section */}

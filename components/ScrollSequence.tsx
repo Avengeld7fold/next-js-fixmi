@@ -1,0 +1,252 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+const TOTAL_FRAMES = 192;
+const FOLDER_PATH = "/sequence";
+
+const formatFrame = (index: number) => {
+  return `${FOLDER_PATH}/frame_${index.toString().padStart(6, "0")}.jpg`;
+};
+
+export default function ScrollSequence() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const currentFrameRef = useRef<number>(0);
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadProgress, setLoadProgress] = useState<number>(0);
+  const [activeCaption, setActiveCaption] = useState<string>(
+    "MENDETEKSI STRUKTUR PERANGKAT & ANALISIS KERUSAKAN"
+  );
+  const [activeStep, setActiveStep] = useState<string>("01 / 05");
+
+  // Cover calculation for drawing images on Canvas without stretching
+  const drawImage = (index: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = imagesRef.current[index];
+    if (!img || !img.complete) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const imgWidth = img.naturalWidth || img.width;
+    const imgHeight = img.naturalHeight || img.height;
+
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const imgRatio = imgWidth / imgHeight;
+    const canvasRatio = canvasWidth / canvasHeight;
+
+    let drawWidth = canvasWidth;
+    let drawHeight = canvasHeight;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (imgRatio > canvasRatio) {
+      drawWidth = canvasHeight * imgRatio;
+      offsetX = (canvasWidth - drawWidth) / 2;
+    } else {
+      drawHeight = canvasWidth / imgRatio;
+      offsetY = (canvasHeight - drawHeight) / 2;
+    }
+
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  };
+
+  // Adjust canvas size based on DPR to prevent blurriness
+  const handleResize = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.scale(dpr, dpr);
+    }
+
+    drawImage(currentFrameRef.current);
+  };
+
+  // Preloading image frames into buffer
+  useEffect(() => {
+    let loadedCount = 0;
+
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      const img = new Image();
+      img.src = formatFrame(i);
+      img.onload = () => {
+        loadedCount++;
+        setLoadProgress(Math.round((loadedCount / TOTAL_FRAMES) * 100));
+        if (loadedCount === TOTAL_FRAMES) {
+          setIsLoading(false);
+        }
+      };
+      img.onerror = () => {
+        // Fail-safe logic
+        loadedCount++;
+        if (loadedCount === TOTAL_FRAMES) {
+          setIsLoading(false);
+        }
+      };
+      imagesRef.current[i] = img;
+    }
+
+    // Cleanup images on unmount
+    return () => {
+      imagesRef.current = [];
+    };
+  }, []);
+
+  // Update caption text efficiently based on active frame
+  const updateCaption = (idx: number) => {
+    let caption = "";
+    let step = "";
+    if (idx < 35) {
+      caption = "MENDETEKSI STRUKTUR PERANGKAT & ANALISIS KERUSAKAN";
+      step = "01 / 05";
+    } else if (idx < 75) {
+      caption = "DEMONTASI PANEL DISPLAY OLED MENGGUNAKAN PANAS TERKALIBRASI";
+      step = "02 / 05";
+    } else if (idx < 120) {
+      caption = "INSULATION TEST & KALIBRASI ARUS PADA MOTHERBOARD";
+      step = "03 / 05";
+    } else if (idx < 160) {
+      caption = "PROSES MICRO-SOLDER PADA JALUR PORT CHARGING & CONNECTOR";
+      step = "04 / 05";
+    } else {
+      caption = "RE-ASSEMBLY DAN UJI KELAYAKAN DIAGNOSTIK AKHIR";
+      step = "05 / 05";
+    }
+
+    setActiveCaption((prev) => (prev !== caption ? caption : prev));
+    setActiveStep((prev) => (prev !== step ? step : prev));
+  };
+
+  // Setup GSAP animation triggering after loading completes
+  useGSAP(
+    () => {
+      if (isLoading) return;
+
+      // Initialize sizes
+      handleResize();
+      window.addEventListener("resize", handleResize);
+
+      // Animation target
+      const frameObj = { index: 0 };
+
+      // Pin scroll container and scrub through frame indices
+      const scrollTriggerInstance = ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top top",
+        end: "+=300%", // Duration is 300% of viewport height
+        scrub: 0.5, // Smooth transition inertia
+        pin: true,
+        onUpdate: (self) => {
+          // Calculate the target frame index linearly based on progress
+          const index = Math.min(
+            TOTAL_FRAMES - 1,
+            Math.floor(self.progress * TOTAL_FRAMES)
+          );
+
+          if (index !== currentFrameRef.current) {
+            currentFrameRef.current = index;
+            drawImage(index);
+            updateCaption(index);
+          }
+        },
+      });
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        scrollTriggerInstance.kill();
+      };
+    },
+    { dependencies: [isLoading], scope: containerRef }
+  );
+
+  return (
+    <div ref={containerRef} className="relative w-full min-h-screen bg-background">
+      {isLoading ? (
+        // Technical Diagnostics Buffering Loader
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-background z-20">
+          <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
+            BUFFERING HARDWARE MEMORY
+          </div>
+          <div className="w-64 h-1 bg-surface-alt border border-border rounded overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-150 ease-out"
+              style={{ width: `${loadProgress}%` }}
+            />
+          </div>
+          <div className="mt-2 text-[10px] text-text-muted uppercase">
+            Frame Buffer: {loadProgress}% / {TOTAL_FRAMES} Frames Loaded
+          </div>
+        </div>
+      ) : (
+        // Fullscreen Interactive Scroll Teardown Display
+        <div className="relative w-full h-screen overflow-hidden">
+          {/* Main Fullscreen Canvas */}
+          <canvas ref={canvasRef} className="w-full h-full object-cover block" />
+
+          {/* HUD Overlay Interface */}
+          <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-between pointer-events-none z-10">
+            {/* Top HUD Row */}
+            <div className="flex items-start justify-between w-full font-mono text-xs text-text-secondary select-none">
+              <div className="flex items-center gap-2 border border-border bg-background/80 px-3 py-1.5 rounded-md backdrop-blur-sm">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
+                <span>DIAGNOSTIC TELEMETRY</span>
+              </div>
+              <div className="border border-border bg-background/80 px-3 py-1.5 rounded-md backdrop-blur-sm">
+                FRAME:{" "}
+                <span className="text-foreground">
+                  {currentFrameRef.current.toString().padStart(3, "0")}
+                </span>{" "}
+                / {TOTAL_FRAMES}
+              </div>
+            </div>
+
+            {/* Bottom HUD Row */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-end justify-between gap-4 w-full">
+              {/* Step info description */}
+              <div className="max-w-[45ch] border border-border bg-background/80 p-4 rounded-md backdrop-blur-sm text-left">
+                <div className="font-mono text-[10px] text-primary mb-1 uppercase tracking-widest">
+                  INSTRUMEN BENCH PROSES
+                </div>
+                <p className="text-sm font-semibold tracking-tight leading-relaxed text-foreground select-none">
+                  {activeCaption}
+                </p>
+              </div>
+
+              {/* Progress counter step index */}
+              <div className="self-end border border-border bg-background/80 px-4 py-3 rounded-md backdrop-blur-sm text-right select-none font-mono">
+                <div className="text-[10px] text-text-muted mb-0.5 uppercase tracking-widest">
+                  TAHAPAN
+                </div>
+                <span className="text-lg font-bold text-primary">{activeStep}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
