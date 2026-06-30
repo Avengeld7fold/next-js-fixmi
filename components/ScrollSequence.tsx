@@ -292,7 +292,7 @@ export default function ScrollSequence() {
                 fontFamily: "var(--font-bayon), sans-serif",
                 fontSize: "clamp(36px, 5.5vw, 100px)",
                 lineHeight: 0.9,
-                letterSpacing: "-0.01em",
+                letterSpacing: "0.03em",
                 color: "var(--fixmi-primary)",
                 textTransform: "uppercase" as const,
                 margin: 0,
