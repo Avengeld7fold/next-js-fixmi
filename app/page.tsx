@@ -30,9 +30,9 @@ export default function Home() {
                   margin: 0,
                 }}
               >
-                BROKEN
+                HP KAMU
                 <br />
-                PHONE?
+                RUSAK?
               </h1>
             </div>
 
@@ -43,41 +43,59 @@ export default function Home() {
 
             {/* Right Column — Big Title + Subtitle */}
             <div className="lg:col-span-4 flex flex-col justify-end items-center lg:items-end text-center lg:text-right lg:translate-y-8">
-              <p
-                style={{
-                  fontFamily: "var(--font-neue-montreal), sans-serif",
-                  fontSize: "clamp(10px, 0.75vw, 13px)",
-                  fontWeight: 500,
-                  letterSpacing: "0.15em",
-                  color: "var(--fixmi-text-secondary)",
-                  textTransform: "uppercase" as const,
-                  marginBottom: "16px",
-                  lineHeight: 1.6,
-                }}
-              >
-                YOUR TRUSTED
-                <br />
-                SMART DEVICE REPAIR
-                <br />
-                SERVICE!
-              </p>
+              {/* Row: Caption + FIXMI */}
+              <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center lg:justify-end gap-4 lg:gap-6 w-full">
+                <p
+                  style={{
+                    fontFamily: "var(--font-neue-montreal), sans-serif",
+                    fontSize: "clamp(10px, 0.75vw, 13px)",
+                    fontWeight: 500,
+                    letterSpacing: "0.15em",
+                    color: "var(--fixmi-text-secondary)",
+                    textTransform: "uppercase" as const,
+                    lineHeight: 1.4,
+                    marginBottom: "8px",
+                  }}
+                  className="text-center lg:text-right"
+                >
+                  YOUR TRUSTED
+                  <br />
+                  SMART DEVICE REPAIR
+                  <br />
+                  SERVICE!
+                </p>
+                <h2
+                  className="text-[64px] md:text-[120px] lg:text-[200px]"
+                  style={{
+                    fontFamily: "var(--font-bayon), sans-serif",
+                    fontWeight: 400,
+                    lineHeight: 0.85,
+                    letterSpacing: "-0.02em",
+                    color: "var(--fixmi-primary)",
+                    textTransform: "uppercase" as const,
+                    margin: 0,
+                  }}
+                >
+                  FIXMI
+                </h2>
+              </div>
+
+              {/* Remaining parts of title */}
               <h2
                 className="text-[64px] md:text-[120px] lg:text-[200px]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
                   fontWeight: 400,
-                  lineHeight: 0.9,
+                  lineHeight: 0.85,
                   letterSpacing: "-0.02em",
                   color: "var(--fixmi-primary)",
                   textTransform: "uppercase" as const,
                   margin: 0,
                 }}
               >
-                WE
+                BALI
                 <br />
-                FIX
-                <br />
-                IT!
+                SOLUSINYA!
               </h2>
             </div>
           </div>
