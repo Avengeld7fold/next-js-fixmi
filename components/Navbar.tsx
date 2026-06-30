@@ -165,37 +165,41 @@ export default function Navbar() {
           >
             BOOK NOW
 
-            {/* Left inverse corner */}
-            <span
+            {/* Left inverse corner fillet */}
+            <svg
               className="absolute pointer-events-none transition-all duration-300"
+              viewBox="0 0 12 12"
               style={{
-                top: "-12px",
+                top: 0,
                 left: "-12px",
                 width: "12px",
                 height: "12px",
-                borderBottomRightRadius: "12px",
-                boxShadow: "-6px -6px 0 6px var(--fixmi-primary)",
+                fill: "var(--fixmi-primary)",
                 opacity: isBookNowHovered ? 1 : 0,
                 transform: isBookNowHovered ? "scale(1)" : "scale(0)",
-                transformOrigin: "bottom right",
+                transformOrigin: "top right",
               }}
-            />
+            >
+              <path d="M0,0 Q12,0 12,12 L12,0 Z" />
+            </svg>
 
-            {/* Right inverse corner */}
-            <span
+            {/* Right inverse corner fillet */}
+            <svg
               className="absolute pointer-events-none transition-all duration-300"
+              viewBox="0 0 12 12"
               style={{
-                top: "-12px",
+                top: 0,
                 right: "-12px",
                 width: "12px",
                 height: "12px",
-                borderBottomLeftRadius: "12px",
-                boxShadow: "6px -6px 0 6px var(--fixmi-primary)",
+                fill: "var(--fixmi-primary)",
                 opacity: isBookNowHovered ? 1 : 0,
                 transform: isBookNowHovered ? "scale(1)" : "scale(0)",
-                transformOrigin: "bottom left",
+                transformOrigin: "top left",
               }}
-            />
+            >
+              <path d="M0,12 Q0,0 12,0 L0,0 Z" />
+            </svg>
           </Link>
         </div>
 
