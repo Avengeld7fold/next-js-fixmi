@@ -17,7 +17,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0 lg:-mt-20">
 
             {/* Left Column — Big Title */}
-            <div className="lg:col-span-4 flex flex-col justify-start items-center lg:items-start text-center lg:text-left lg:-mt-24">
+            <div className="lg:col-span-4 flex flex-col justify-start items-center lg:items-start text-center lg:text-left lg:self-start lg:-mt-[120px]">
               <h1
                 className="text-[64px] md:text-[120px] lg:text-[200px]"
                 style={{
