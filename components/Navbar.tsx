@@ -49,7 +49,7 @@ export default function Navbar() {
         className="absolute top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
         style={{
           background: "var(--fixmi-primary)",
-          height: "5px",
+          height: "8px",
           opacity: isBookNowHovered ? 1 : 0,
           zIndex: 5,
         }}
@@ -144,7 +144,7 @@ export default function Navbar() {
             className="absolute right-0 flex items-center justify-center no-underline transition-all duration-300"
             style={{
               top: 0,
-              height: "48px",
+              height: "64px",
               padding: "0 28px",
               fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
               fontSize: "13px",
@@ -157,13 +157,45 @@ export default function Navbar() {
               borderTopLeftRadius: isBookNowHovered ? "6px" : "0px",
               borderTopRightRadius: isBookNowHovered ? "6px" : "0px",
               textTransform: "uppercase" as const,
-              transform: isBookNowHovered ? "translateY(5px)" : "translateY(0)",
+              transform: isBookNowHovered ? "translateY(8px)" : "translateY(0)",
               zIndex: 10,
             }}
             onMouseEnter={() => setIsBookNowHovered(true)}
             onMouseLeave={() => setIsBookNowHovered(false)}
           >
             BOOK NOW
+
+            {/* Left inverse corner */}
+            <span
+              className="absolute pointer-events-none transition-all duration-300"
+              style={{
+                top: "-8px",
+                left: "-8px",
+                width: "8px",
+                height: "8px",
+                borderBottomRightRadius: "8px",
+                boxShadow: "-4px -4px 0 4px var(--fixmi-primary)",
+                opacity: isBookNowHovered ? 1 : 0,
+                transform: isBookNowHovered ? "scale(1)" : "scale(0)",
+                transformOrigin: "bottom right",
+              }}
+            />
+
+            {/* Right inverse corner */}
+            <span
+              className="absolute pointer-events-none transition-all duration-300"
+              style={{
+                top: "-8px",
+                right: "-8px",
+                width: "8px",
+                height: "8px",
+                borderBottomLeftRadius: "8px",
+                boxShadow: "4px -4px 0 4px var(--fixmi-primary)",
+                opacity: isBookNowHovered ? 1 : 0,
+                transform: isBookNowHovered ? "scale(1)" : "scale(0)",
+                transformOrigin: "bottom left",
+              }}
+            />
           </Link>
         </div>
 
