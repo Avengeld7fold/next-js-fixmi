@@ -69,10 +69,7 @@ function DeviceModel() {
 
 export default function Hero3D() {
   return (
-    <div className="relative w-full h-[350px] md:h-[550px] select-none">
-      {/* Precision grid backdrop behind canvas to look like diagnostic screen */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(242,106,33,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(242,106,33,0.02)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none rounded-lg border border-border/50" />
-      
+    <div className="relative w-full h-[400px] md:h-[600px] select-none">
       <Canvas
         camera={{ position: [0, 0, 8], fov: 45 }}
         gl={{

@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, Geist_Mono, Bayon } from "next/font/google";
 import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
+
+const bayon = Bayon({
+  variable: "--font-bayon",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -60,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} ${neueMontreal.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} h-full antialiased`}
       data-scroll-behavior="smooth"
     >
       <head>
