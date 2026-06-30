@@ -21,6 +21,7 @@ export default function ScrollSequence() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const currentFrameRef = useRef<number>(0);
+  const frameCounterRef = useRef<HTMLSpanElement>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadProgress, setLoadProgress] = useState<number>(0);
@@ -77,11 +78,6 @@ export default function ScrollSequence() {
 
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.scale(dpr, dpr);
-    }
 
     drawImage(currentFrameRef.current);
   };
@@ -145,6 +141,7 @@ export default function ScrollSequence() {
 
     // Initialize sizes once loaded
     handleResize();
+    ScrollTrigger.refresh();
 
     window.addEventListener("resize", debouncedResize);
     return () => {
@@ -203,6 +200,9 @@ export default function ScrollSequence() {
             currentFrameRef.current = index;
             drawImage(index);
             updateCaption(index);
+            if (frameCounterRef.current) {
+              frameCounterRef.current.textContent = index.toString().padStart(3, "0");
+            }
           }
         },
       });
@@ -252,8 +252,8 @@ export default function ScrollSequence() {
               </div>
               <div className="border border-border bg-background/80 px-3 py-1.5 rounded-md backdrop-blur-sm">
                 FRAME:{" "}
-                <span className="text-foreground">
-                  {currentFrameRef.current.toString().padStart(3, "0")}
+                <span ref={frameCounterRef} className="text-foreground">
+                  000
                 </span>{" "}
                 / {TOTAL_FRAMES}
               </div>
