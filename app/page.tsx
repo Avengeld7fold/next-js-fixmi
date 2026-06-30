@@ -14,7 +14,7 @@ export default function Home() {
 
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-8 md:px-12 lg:px-16 py-16 lg:py-0">
           {/* 3-Column Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0 lg:-mt-12">
 
             {/* Left Column — Big Title */}
             <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
