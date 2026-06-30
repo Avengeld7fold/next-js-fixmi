@@ -260,25 +260,35 @@ export default function ScrollSequence() {
             </div>
 
             {/* Bottom HUD Row */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-end justify-between gap-4 w-full">
-              {/* Step info description */}
-              <div className="max-w-[45ch] border border-border bg-background/80 p-4 rounded-md backdrop-blur-sm text-left">
-                <div className="font-mono text-[10px] text-primary mb-1 uppercase tracking-widest">
-                  INSTRUMEN BENCH PROSES
-                </div>
-                <p className="text-sm font-semibold tracking-tight leading-relaxed text-foreground select-none">
-                  {activeCaption}
-                </p>
-              </div>
-
+            <div className="flex items-end justify-end w-full">
               {/* Progress counter step index */}
-              <div className="self-end border border-border bg-background/80 px-4 py-3 rounded-md backdrop-blur-sm text-right select-none font-mono">
+              <div className="border border-border bg-background/80 px-4 py-3 rounded-md backdrop-blur-sm text-right select-none font-mono">
                 <div className="text-[10px] text-text-muted mb-0.5 uppercase tracking-widest">
                   TAHAPAN
                 </div>
                 <span className="text-lg font-bold text-primary">{activeStep}</span>
               </div>
             </div>
+          </div>
+
+          {/* Left-Centered Huge Caption */}
+          <div className="absolute left-6 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 w-[90%] max-w-[500px] md:max-w-[700px] lg:max-w-[850px] pointer-events-none z-10 text-left select-none">
+            <div className="font-mono text-[10px] md:text-xs text-primary mb-2 uppercase tracking-widest">
+              INSTRUMEN BENCH PROSES
+            </div>
+            <h2
+              style={{
+                fontFamily: "var(--font-bayon), sans-serif",
+                fontSize: "clamp(36px, 6.5vw, 150px)",
+                lineHeight: 0.9,
+                letterSpacing: "-0.01em",
+                color: "var(--fixmi-primary)",
+                textTransform: "uppercase" as const,
+                margin: 0,
+              }}
+            >
+              {activeCaption}
+            </h2>
           </div>
         </div>
       )}
