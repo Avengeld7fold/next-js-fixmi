@@ -280,14 +280,14 @@ p {
   color: var(--fixmi-primary-dark);
 }
 
-/* White underline — animates left to right */
+/* Orange underline — animates left to right */
 .navbar-menu-underline {
   position: absolute;
   bottom: 2px;
   left: 20px;
   right: 20px;
-  height: 2px;
-  background: #ffffff;
+  height: 1px;
+  background: var(--fixmi-primary);
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
