@@ -17,13 +17,13 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0 lg:-mt-20">
 
             {/* Left Column — Big Title */}
-            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-start text-center lg:text-left lg:-translate-y-24">
+            <div className="lg:col-span-4 flex flex-col justify-start items-center lg:items-start text-center lg:text-left lg:-mt-24">
               <h1
+                className="text-[64px] md:text-[120px] lg:text-[217px]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
-                  fontSize: "clamp(54px, 13vw, 217px)",
                   fontWeight: 400,
-                  lineHeight: 0.95,
+                  lineHeight: 0.9,
                   letterSpacing: "-0.02em",
                   color: "var(--fixmi-primary)",
                   textTransform: "uppercase" as const,
@@ -42,7 +42,7 @@ export default function Home() {
             </div>
 
             {/* Right Column — Big Title + Subtitle */}
-            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-end text-center lg:text-right lg:translate-y-12">
+            <div className="lg:col-span-4 flex flex-col justify-end items-center lg:items-end text-center lg:text-right lg:translate-y-8">
               <p
                 style={{
                   fontFamily: "var(--font-neue-montreal), sans-serif",
@@ -62,11 +62,11 @@ export default function Home() {
                 SERVICE!
               </p>
               <h2
+                className="text-[64px] md:text-[120px] lg:text-[217px]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
-                  fontSize: "clamp(54px, 13vw, 217px)",
                   fontWeight: 400,
-                  lineHeight: 0.95,
+                  lineHeight: 0.9,
                   letterSpacing: "-0.02em",
                   color: "var(--fixmi-primary)",
                   textTransform: "uppercase" as const,
