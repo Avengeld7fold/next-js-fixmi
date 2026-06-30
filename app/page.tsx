@@ -12,16 +12,16 @@ export default function Home() {
           <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-accent/4 blur-[100px]" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6">
+        <div className="relative z-10 w-full px-6 lg:px-[4vw] py-16 lg:py-0">
           {/* 3-Column Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-0 lg:gap-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0">
 
             {/* Left Column — Big Title */}
-            <div className="lg:col-span-4 flex flex-col justify-center items-start">
+            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
               <h1
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
-                  fontSize: "clamp(64px, 8vw, 120px)",
+                  fontSize: "clamp(54px, 7vw, 140px)",
                   fontWeight: 400,
                   lineHeight: 0.95,
                   letterSpacing: "-0.02em",
@@ -37,16 +37,16 @@ export default function Home() {
             </div>
 
             {/* Center Column — 3D Model */}
-            <div className="lg:col-span-4 flex items-center justify-center">
+            <div className="lg:col-span-4 flex items-center justify-center w-full min-h-[320px] lg:min-h-[500px]">
               <Hero3D />
             </div>
 
             {/* Right Column — Big Title + Subtitle */}
-            <div className="lg:col-span-4 flex flex-col justify-center items-end text-right">
+            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-end text-center lg:text-right">
               <p
                 style={{
                   fontFamily: "var(--font-neue-montreal), sans-serif",
-                  fontSize: "11px",
+                  fontSize: "clamp(10px, 0.75vw, 13px)",
                   fontWeight: 500,
                   letterSpacing: "0.15em",
                   color: "var(--fixmi-text-secondary)",
@@ -64,7 +64,7 @@ export default function Home() {
               <h2
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
-                  fontSize: "clamp(64px, 8vw, 120px)",
+                  fontSize: "clamp(54px, 7vw, 140px)",
                   fontWeight: 400,
                   lineHeight: 0.95,
                   letterSpacing: "-0.02em",

@@ -69,7 +69,7 @@ function DeviceModel() {
 
 export default function Hero3D() {
   return (
-    <div className="relative w-full h-[400px] md:h-[600px] select-none">
+    <div className="relative w-full h-[300px] md:h-[450px] lg:h-[550px] xl:h-[650px] select-none">
       <Canvas
         camera={{ position: [0, 0, 8], fov: 45 }}
         gl={{
