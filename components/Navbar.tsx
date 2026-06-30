@@ -128,11 +128,7 @@ export default function Navbar() {
                   {link.label}
                   {/* Orange underline — animates left to right on hover */}
                   <span
-                    className={`
-                      absolute bottom-0.5 left-5 right-5 h-[1px] 
-                      transition-transform duration-300 ease-out origin-left
-                      ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}
-                    `}
+                    className="absolute bottom-0.5 left-5 right-5 h-[1px] transition-transform duration-300 ease-out origin-left scale-x-0 group-hover:scale-x-100"
                     style={{ background: "var(--fixmi-primary)" }}
                   />
                 </Link>
