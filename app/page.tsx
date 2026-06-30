@@ -1,7 +1,36 @@
+"use client";
+
 import Hero3D from "@/components/Hero3D";
 import ScrollSequence from "@/components/ScrollSequence";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export default function Home() {
+  const leftTitleRef = useRef<HTMLHeadingElement>(null);
+  const rightTitle1Ref = useRef<HTMLHeadingElement>(null);
+  const rightTitle2Ref = useRef<HTMLHeadingElement>(null);
+  const captionRef = useRef<HTMLParagraphElement>(null);
+
+  useGSAP(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1.0 } });
+
+    tl.fromTo(leftTitleRef.current,
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0 }
+    )
+    .fromTo([rightTitle1Ref.current, rightTitle2Ref.current],
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0 },
+      "-=0.6"
+    )
+    .fromTo(captionRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0 },
+      "-=0.6"
+    );
+  });
+
   return (
     <>
       {/* Hero Section */}
@@ -19,6 +48,7 @@ export default function Home() {
             {/* Left Column — Big Title */}
             <div className="lg:col-span-4 flex flex-col justify-start items-center lg:items-start text-center lg:text-left lg:self-start lg:-mt-[120px]">
               <h1
+                ref={leftTitleRef}
                 className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
@@ -28,6 +58,7 @@ export default function Home() {
                   color: "var(--fixmi-primary)",
                   textTransform: "uppercase" as const,
                   margin: 0,
+                  opacity: 0,
                 }}
               >
                 HP KAMU
@@ -46,6 +77,7 @@ export default function Home() {
               {/* Row: Caption + FIXMI BALI */}
               <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center lg:justify-end gap-4 lg:gap-6 w-full">
                 <p
+                  ref={captionRef}
                   style={{
                     fontFamily: "var(--font-neue-montreal), sans-serif",
                     fontSize: "clamp(10px, 0.75vw, 13px)",
@@ -55,6 +87,7 @@ export default function Home() {
                     textTransform: "uppercase" as const,
                     lineHeight: 1.4,
                     marginBottom: "20px", // raised to align with the bottom of FIXMI BALI
+                    opacity: 0,
                   }}
                   className="text-center lg:text-right"
                 >
@@ -65,6 +98,7 @@ export default function Home() {
                   SERVICE!
                 </p>
                 <h2
+                  ref={rightTitle1Ref}
                   className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                   style={{
                     fontFamily: "var(--font-bayon), sans-serif",
@@ -75,6 +109,7 @@ export default function Home() {
                     textTransform: "uppercase" as const,
                     margin: 0,
                     whiteSpace: "nowrap",
+                    opacity: 0,
                   }}
                 >
                   FIXMI BALI
@@ -83,6 +118,7 @@ export default function Home() {
 
               {/* Remaining parts of title */}
               <h2
+                ref={rightTitle2Ref}
                 className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
@@ -92,6 +128,7 @@ export default function Home() {
                   color: "var(--fixmi-primary)",
                   textTransform: "uppercase" as const,
                   margin: 0,
+                  opacity: 0,
                 }}
               >
                 SOLUSINYA!
