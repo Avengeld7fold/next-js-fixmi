@@ -50,7 +50,10 @@ export default function Navbar() {
         style={{
           background: "var(--fixmi-primary)",
           height: "8px",
-          borderRadius: "4px",
+          borderBottomLeftRadius: "8px",
+          borderBottomRightRadius: "8px",
+          borderTopLeftRadius: "0px",
+          borderTopRightRadius: "0px",
           opacity: isBookNowHovered ? 1 : 0,
           zIndex: 5,
         }}
