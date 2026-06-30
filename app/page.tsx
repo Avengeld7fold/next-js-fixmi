@@ -13,21 +13,21 @@ export default function Home() {
   const captionRef = useRef<HTMLParagraphElement>(null);
 
   useGSAP(() => {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1.0 } });
+    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1.6 } });
 
     tl.fromTo(leftTitleRef.current,
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0 }
+      { opacity: 0, y: 50, filter: "blur(12px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)" }
     )
     .fromTo([rightTitle1Ref.current, rightTitle2Ref.current],
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0 },
-      "-=0.6"
+      { opacity: 0, y: 50, filter: "blur(12px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)" },
+      "-=1.1"
     )
     .fromTo(captionRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0 },
-      "-=0.6"
+      { opacity: 0, y: 25, filter: "blur(8px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)" },
+      "-=1.1"
     );
   });
 
@@ -59,6 +59,7 @@ export default function Home() {
                   textTransform: "uppercase" as const,
                   margin: 0,
                   opacity: 0,
+                  filter: "blur(12px)",
                 }}
               >
                 HP KAMU
@@ -88,6 +89,7 @@ export default function Home() {
                     lineHeight: 1.4,
                     marginBottom: "20px", // raised to align with the bottom of FIXMI BALI
                     opacity: 0,
+                    filter: "blur(8px)",
                   }}
                   className="text-center lg:text-right"
                 >
@@ -110,6 +112,7 @@ export default function Home() {
                     margin: 0,
                     whiteSpace: "nowrap",
                     opacity: 0,
+                    filter: "blur(12px)",
                   }}
                 >
                   FIXMI BALI
@@ -129,6 +132,7 @@ export default function Home() {
                   textTransform: "uppercase" as const,
                   margin: 0,
                   opacity: 0,
+                  filter: "blur(12px)",
                 }}
               >
                 SOLUSINYA!
