@@ -46,11 +46,12 @@ export default function Navbar() {
     >
       {/* Orange reveal strip — appears behind BOOK NOW on hover */}
       <div
-        className="absolute top-0 left-0 right-0 h-full pointer-events-none transition-opacity duration-300"
+        className="absolute top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
         style={{
           background: "var(--fixmi-primary)",
+          height: "5px",
           opacity: isBookNowHovered ? 1 : 0,
-          zIndex: 0,
+          zIndex: 5,
         }}
       />
 
@@ -137,21 +138,27 @@ export default function Navbar() {
         </ul>
 
         {/* CTA — Right (Desktop) */}
-        <div className="hidden lg:flex items-center shrink-0">
+        <div className="hidden lg:block relative shrink-0" style={{ width: "150px", height: "72px" }}>
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center no-underline transition-all duration-300"
+            className="absolute right-0 flex items-center justify-center no-underline transition-all duration-300"
             style={{
-              padding: "12px 28px",
+              top: 0,
+              height: "48px",
+              padding: "0 28px",
               fontFamily: "'Neue Montreal', var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
               fontSize: "13px",
               fontWeight: 700,
               letterSpacing: "0.1em",
               color: "#ffffff",
               background: "var(--fixmi-primary)",
-              borderRadius: "6px",
+              borderBottomLeftRadius: "6px",
+              borderBottomRightRadius: "6px",
+              borderTopLeftRadius: isBookNowHovered ? "6px" : "0px",
+              borderTopRightRadius: isBookNowHovered ? "6px" : "0px",
               textTransform: "uppercase" as const,
-              transform: isBookNowHovered ? "translateY(6px)" : "translateY(0)",
+              transform: isBookNowHovered ? "translateY(5px)" : "translateY(0)",
+              zIndex: 10,
             }}
             onMouseEnter={() => setIsBookNowHovered(true)}
             onMouseLeave={() => setIsBookNowHovered(false)}
