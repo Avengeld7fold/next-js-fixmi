@@ -46,10 +46,10 @@ export default function Navbar() {
     >
       {/* Orange reveal strip — appears behind BOOK NOW on hover */}
       <div
-        className="absolute top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
+        className="absolute top-0 left-0 right-0 pointer-events-none transition-all duration-300"
         style={{
           background: "var(--fixmi-primary)",
-          height: "8px",
+          height: isBookNowHovered ? "8px" : "0px",
           borderBottomLeftRadius: "8px",
           borderBottomRightRadius: "8px",
           borderTopLeftRadius: "0px",
