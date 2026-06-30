@@ -65,7 +65,7 @@ export default function Home() {
                   SERVICE!
                 </p>
                 <h2
-                  className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)] whitespace-nowrap"
+                  className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                   style={{
                     fontFamily: "var(--font-bayon), sans-serif",
                     fontWeight: 400,
@@ -74,6 +74,7 @@ export default function Home() {
                     color: "var(--fixmi-primary)",
                     textTransform: "uppercase" as const,
                     margin: 0,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   FIXMI BALI
