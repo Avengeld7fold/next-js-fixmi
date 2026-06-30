@@ -42,7 +42,7 @@ export default function Navbar() {
   return (
     <header
       className="relative z-50 w-full"
-      style={{ background: "var(--fixmi-bg-glass)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--fixmi-border)" }}
+      style={{ background: "var(--fixmi-bg-primary)", borderBottom: "1px solid var(--fixmi-border)" }}
     >
       {/* Orange reveal strip — appears behind BOOK NOW on hover */}
       <div
@@ -250,9 +250,7 @@ export default function Navbar() {
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
           style={{
-            background: "var(--fixmi-bg-glass-strong)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            background: "var(--fixmi-bg-primary)",
             borderLeft: "1px solid var(--fixmi-border)",
           }}
         >
