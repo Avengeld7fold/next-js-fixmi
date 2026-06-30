@@ -55,8 +55,8 @@ export default function Navbar() {
       />
 
       <nav
-        className="relative z-10 mx-auto flex items-center justify-between"
-        style={{ maxWidth: "1280px", padding: "0 40px", height: "72px" }}
+        className="relative z-10 mx-auto w-full max-w-7xl px-6 flex items-center justify-between"
+        style={{ height: "72px" }}
       >
         {/* Logo — Left */}
         <Link href="/" className="group flex items-center gap-2.5 no-underline shrink-0">
