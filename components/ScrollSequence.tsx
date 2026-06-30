@@ -25,8 +25,11 @@ export default function ScrollSequence() {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadProgress, setLoadProgress] = useState<number>(0);
-  const [activeCaption, setActiveCaption] = useState<string>(
-    "MENDETEKSI STRUKTUR PERANGKAT & ANALISIS KERUSAKAN"
+  const [activeTitle, setActiveTitle] = useState<string>(
+    "DIAGNOSIS PRESISI."
+  );
+  const [activeDetail, setActiveDetail] = useState<string>(
+    "Mendeteksi secara mikro setiap titik kerusakan pada struktur sirkuit internal perangkat Anda melalui pemindaian telemetri digital menyeluruh."
   );
   const [activeStep, setActiveStep] = useState<string>("01 / 05");
 
@@ -152,26 +155,34 @@ export default function ScrollSequence() {
 
   // Update caption text efficiently based on active frame
   const updateCaption = (idx: number) => {
-    let caption = "";
+    let title = "";
+    let detail = "";
     let step = "";
+
     if (idx < 35) {
-      caption = "MENDETEKSI STRUKTUR PERANGKAT & ANALISIS KERUSAKAN";
+      title = "DIAGNOSIS PRESISI.";
+      detail = "Mendeteksi secara mikro setiap titik kerusakan pada struktur sirkuit internal perangkat Anda melalui pemindaian telemetri digital menyeluruh.";
       step = "01 / 05";
     } else if (idx < 75) {
-      caption = "DEMONTASI PANEL DISPLAY OLED MENGGUNAKAN PANAS TERKALIBRASI";
+      title = "DEKONSOLIDASI AMAN.";
+      detail = "Pelepasan panel display OLED menggunakan suhu panas yang terkalibrasi khusus guna melindungi sirkuit display dan lapisan sensitif di bawahnya.";
       step = "02 / 05";
     } else if (idx < 120) {
-      caption = "INSULATION TEST & KALIBRASI ARUS PADA MOTHERBOARD";
+      title = "UJI MOTHERBOARD.";
+      detail = "Melakukan pengujian isolasi arus dan kalibrasi daya pada jalur sirkuit utama untuk memastikan stabilitas kelistrikan tanpa risiko korsleting.";
       step = "03 / 05";
     } else if (idx < 160) {
-      caption = "PROSES MICRO-SOLDER PADA JALUR PORT CHARGING & CONNECTOR";
+      title = "REPARASI MIKRO.";
+      detail = "Proses micro-soldering presisi tinggi pada konektor sirkuit dan port daya menggunakan mikroskop optik modern oleh teknisi tersertifikasi.";
       step = "04 / 05";
     } else {
-      caption = "RE-ASSEMBLY DAN UJI KELAYAKAN DIAGNOSTIK AKHIR";
+      title = "KALIBRASI TOTAL.";
+      detail = "Pemasangan kembali komponen dengan sealant tahan air standar pabrikan, diikuti uji kelayakan fungsi diagnostik menyeluruh.";
       step = "05 / 05";
     }
 
-    setActiveCaption((prev) => (prev !== caption ? caption : prev));
+    setActiveTitle((prev) => (prev !== title ? title : prev));
+    setActiveDetail((prev) => (prev !== detail ? detail : prev));
     setActiveStep((prev) => (prev !== step ? step : prev));
   };
 
@@ -273,22 +284,35 @@ export default function ScrollSequence() {
 
           {/* Left-Centered Huge Caption */}
           <div className="absolute left-6 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 w-[90%] max-w-[500px] md:max-w-[700px] lg:max-w-[850px] pointer-events-none z-10 text-left select-none">
-            <div className="font-mono text-[10px] md:text-xs text-primary mb-2 uppercase tracking-widest">
+            <div className="font-mono text-[10px] md:text-xs text-primary mb-3 uppercase tracking-widest">
               INSTRUMEN BENCH PROSES
             </div>
             <h2
               style={{
                 fontFamily: "var(--font-bayon), sans-serif",
-                fontSize: "clamp(36px, 6.5vw, 150px)",
+                fontSize: "clamp(36px, 6.5vw, 120px)",
                 lineHeight: 0.9,
                 letterSpacing: "-0.01em",
-                color: "var(--fixmi-primary)",
+                color: "#ffffff",
                 textTransform: "uppercase" as const,
                 margin: 0,
               }}
             >
-              {activeCaption}
+              {activeTitle}
             </h2>
+            <p
+              style={{
+                fontFamily: "var(--font-neue-montreal), sans-serif",
+                fontSize: "clamp(14px, 1.1vw, 18px)",
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: "rgba(255, 255, 255, 0.8)",
+                margin: "24px 0 0 0",
+                maxWidth: "600px",
+              }}
+            >
+              {activeDetail}
+            </p>
           </div>
         </div>
       )}
