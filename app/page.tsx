@@ -19,7 +19,7 @@ export default function Home() {
             {/* Left Column — Big Title */}
             <div className="lg:col-span-4 flex flex-col justify-start items-center lg:items-start text-center lg:text-left lg:self-start lg:-mt-[120px]">
               <h1
-                className="text-[64px] md:text-[120px] lg:text-[150px]"
+                className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
                   fontWeight: 400,
@@ -43,7 +43,7 @@ export default function Home() {
 
             {/* Right Column — Big Title + Subtitle */}
             <div className="lg:col-span-4 flex flex-col justify-end items-center lg:items-end text-center lg:text-right lg:translate-y-8">
-              {/* Row: Caption + FIXMI */}
+              {/* Row: Caption + FIXMI BALI */}
               <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center lg:justify-end gap-4 lg:gap-6 w-full">
                 <p
                   style={{
@@ -54,7 +54,7 @@ export default function Home() {
                     color: "var(--fixmi-text-secondary)",
                     textTransform: "uppercase" as const,
                     lineHeight: 1.4,
-                    marginBottom: "8px",
+                    marginBottom: "20px", // raised to align with the bottom of FIXMI BALI
                   }}
                   className="text-center lg:text-right"
                 >
@@ -65,7 +65,7 @@ export default function Home() {
                   SERVICE!
                 </p>
                 <h2
-                  className="text-[64px] md:text-[120px] lg:text-[150px]"
+                  className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                   style={{
                     fontFamily: "var(--font-bayon), sans-serif",
                     fontWeight: 400,
@@ -76,13 +76,13 @@ export default function Home() {
                     margin: 0,
                   }}
                 >
-                  FIXMI
+                  FIXMI BALI
                 </h2>
               </div>
 
               {/* Remaining parts of title */}
               <h2
-                className="text-[64px] md:text-[120px] lg:text-[150px]"
+                className="text-[64px] md:text-[120px] lg:text-[clamp(100px,9vw,150px)]"
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
                   fontWeight: 400,
@@ -93,8 +93,6 @@ export default function Home() {
                   margin: 0,
                 }}
               >
-                BALI
-                <br />
                 SOLUSINYA!
               </h2>
             </div>
