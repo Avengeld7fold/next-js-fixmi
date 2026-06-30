@@ -17,11 +17,11 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0 lg:-mt-20">
 
             {/* Left Column — Big Title */}
-            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
+            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-start text-center lg:text-left lg:-translate-y-24">
               <h1
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
-                  fontSize: "clamp(54px, 7vw, 140px)",
+                  fontSize: "clamp(54px, 13vw, 217px)",
                   fontWeight: 400,
                   lineHeight: 0.95,
                   letterSpacing: "-0.02em",
@@ -42,7 +42,7 @@ export default function Home() {
             </div>
 
             {/* Right Column — Big Title + Subtitle */}
-            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-end text-center lg:text-right">
+            <div className="lg:col-span-4 flex flex-col justify-center items-center lg:items-end text-center lg:text-right lg:translate-y-12">
               <p
                 style={{
                   fontFamily: "var(--font-neue-montreal), sans-serif",
@@ -64,7 +64,7 @@ export default function Home() {
               <h2
                 style={{
                   fontFamily: "var(--font-bayon), sans-serif",
-                  fontSize: "clamp(54px, 7vw, 140px)",
+                  fontSize: "clamp(54px, 13vw, 217px)",
                   fontWeight: 400,
                   lineHeight: 0.95,
                   letterSpacing: "-0.02em",
