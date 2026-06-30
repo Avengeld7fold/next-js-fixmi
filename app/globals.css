@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../components";
+@source "../app";
 
 /* ============================
    FIXMI Precision Design System
@@ -158,4 +160,13 @@ p {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ============================
+   Navbar — Reference Design
+   ============================ */
+
+.navbar-header {
+  background: oklch(15% 0.005 240);
+  border-bottom: 1px solid var(--fixmi-border);
 }

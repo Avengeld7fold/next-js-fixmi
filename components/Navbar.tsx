@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -10,26 +10,17 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
-  { href: "/", label: "Home" },
-  { href: "/pricelist", label: "Pricelist" },
+  { href: "/", label: "HOME" },
+  { href: "/pricelist", label: "PRICING" },
+  { href: "/promo", label: "PROMO" },
+  { href: "/gallery", label: "GALLERY REPAIR" },
+  { href: "/about", label: "ABOUT US" },
 ];
 
-const SCROLL_THRESHOLD = 20;
-
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isBookNowHovered, setIsBookNowHovered] = useState<boolean>(false);
   const pathname = usePathname();
-
-  const handleScroll = useCallback(() => {
-    setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Check initial scroll position
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -49,29 +40,31 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   return (
-    <header
-      className={`
-        fixed top-0 left-0 right-0 z-50
-        transition-all duration-300 ease-out
-        ${
-          isScrolled
-            ? "fixmi-glass-strong border-b border-border shadow-md"
-            : "bg-transparent border-b border-transparent"
-        }
-      `}
-    >
-      <nav className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between md:h-18">
+    <header className="navbar-header relative z-50 w-full">
+      {/* Orange reveal strip — sits behind BOOK NOW, revealed on hover */}
+      <div
+        className={`
+          absolute top-0 left-0 right-0 h-full
+          bg-primary
+          transition-all duration-300 ease-out
+          pointer-events-none
+          ${isBookNowHovered ? "opacity-100" : "opacity-0"}
+        `}
+      />
+
+      <nav className="navbar-inner relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-8">
+        <div className="flex h-[72px] items-center justify-between">
+
           {/* Logo */}
           <Link
             href="/"
-            className="group relative flex items-center gap-3"
+            className="group relative flex items-center gap-3 shrink-0"
           >
-            {/* Logo icon - Clinical Diagnostic Style */}
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-primary bg-surface shadow-sm transition-colors duration-200 group-hover:bg-surface-alt">
+            {/* Logo icon */}
+            <div className="relative flex h-10 w-10 items-center justify-center">
               <svg
-                width="16"
-                height="16"
+                width="28"
+                height="28"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -86,15 +79,15 @@ export default function Navbar() {
                 />
               </svg>
             </div>
-            {/* Logo text - Technical Font */}
-            <span className="font-display text-lg font-bold tracking-tight uppercase">
+            {/* Logo text */}
+            <span className="font-display text-xl font-extrabold tracking-tight uppercase leading-none">
               <span className="text-primary">FIX</span>
-              <span className="text-foreground">MI</span>
+              <span className="text-primary">MI</span>
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden items-center gap-2 md:flex">
+          {/* Desktop Navigation — Center */}
+          <div className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href ||
                 (link.href !== "/" && pathname.startsWith(link.href));
@@ -102,47 +95,38 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`
-                    relative px-4 py-2 text-sm font-medium rounded-md
-                    transition-colors duration-200
-                    ${
-                      isActive
-                        ? "text-primary"
-                        : "text-text-secondary hover:text-foreground"
-                    }
-                  `}
+                  className="navbar-link group relative px-5 py-2 text-[13px] font-bold tracking-[0.08em] transition-colors duration-200"
+                  style={{ color: "var(--fixmi-primary)" }}
                 >
                   {link.label}
-                  {/* Precise active underline indicator instead of floating dots */}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary" />
-                  )}
+                  {/* White underline animation: left to right on hover */}
+                  <span
+                    className={`
+                      absolute bottom-0 left-5 right-5 h-[2px] bg-white
+                      transition-transform duration-300 ease-out origin-left
+                      ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}
+                    `}
+                  />
                 </Link>
               );
             })}
-            {/* Technical solid Cobalt Blue button */}
+          </div>
+
+          {/* Desktop CTA — BOOK NOW */}
+          <div className="hidden lg:flex items-center shrink-0">
             <Link
-              href="/pricelist"
-              className="
-                ml-4 inline-flex items-center gap-2 rounded-md
-                bg-primary px-5 py-2 text-sm font-semibold text-white
-                transition-all duration-200 ease-out
-                hover:bg-primary-light active:scale-[0.98]
-              "
+              href="/contact"
+              className={`
+                navbar-booknow relative inline-flex items-center justify-center
+                rounded-md bg-primary px-7 py-3 text-[13px] font-bold tracking-[0.08em] text-white uppercase
+                transition-all duration-300 ease-out
+                hover:bg-primary-light
+                ${isBookNowHovered ? "translate-y-[6px]" : "translate-y-0"}
+              `}
+              onMouseEnter={() => setIsBookNowHovered(true)}
+              onMouseLeave={() => setIsBookNowHovered(false)}
             >
-              Cek Harga
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              BOOK NOW
             </Link>
           </div>
 
@@ -150,27 +134,27 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="relative z-50 flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:text-foreground md:hidden"
+            className="relative z-50 flex h-11 w-11 items-center justify-center rounded-md text-primary transition-colors lg:hidden"
             aria-label="Toggle navigation menu"
             aria-expanded={isMobileMenuOpen}
           >
-            <div className="flex h-5 w-5 flex-col items-center justify-center gap-[5px]">
+            <div className="flex h-5 w-6 flex-col items-center justify-center gap-[6px]">
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-200 ${
+                className={`block h-[2px] w-6 rounded-full bg-current transition-all duration-300 ${
                   isMobileMenuOpen
-                    ? "translate-y-[7px] rotate-45"
+                    ? "translate-y-[8px] rotate-45"
                     : ""
                 }`}
               />
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-200 ${
+                className={`block h-[2px] w-6 rounded-full bg-current transition-all duration-300 ${
                   isMobileMenuOpen ? "opacity-0 scale-0" : ""
                 }`}
               />
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-200 ${
+                className={`block h-[2px] w-6 rounded-full bg-current transition-all duration-300 ${
                   isMobileMenuOpen
-                    ? "-translate-y-[7px] -rotate-45"
+                    ? "-translate-y-[8px] -rotate-45"
                     : ""
                 }`}
               />
@@ -179,10 +163,13 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Bottom border line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-border z-10" />
+
       {/* Mobile Menu Overlay */}
       <div
         className={`
-          fixed inset-0 z-40 md:hidden
+          fixed inset-0 z-40 lg:hidden
           transition-all duration-300
           ${
             isMobileMenuOpen
@@ -193,66 +180,62 @@ export default function Navbar() {
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/90 backdrop-blur-md"
           onClick={() => setIsMobileMenuOpen(false)}
         />
-        {/* Menu Panel */}
+        {/* Menu Panel — Full-screen slide from right */}
         <div
           className={`
-            absolute top-0 right-0 h-full w-[280px]
+            absolute top-0 right-0 h-full w-full max-w-[320px]
             bg-surface border-l border-border
             transition-transform duration-300 ease-out
             ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
           `}
         >
-          <div className="flex flex-col gap-2 px-6 pt-24">
-            {NAV_LINKS.map((link) => {
-              const isActive = pathname === link.href ||
-                (link.href !== "/" && pathname.startsWith(link.href));
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`
-                    rounded-md px-4 py-3 text-base font-medium
-                    transition-colors duration-200
-                    ${
-                      isActive
-                        ? "bg-surface-alt text-primary"
-                        : "text-text-secondary hover:bg-surface-alt hover:text-foreground"
-                    }
-                  `}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            <div className="my-3 h-px bg-border" />
-            <Link
-              href="/pricelist"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="
-                flex items-center justify-center gap-2 rounded-md
-                bg-primary px-5 py-3 text-base font-semibold text-white
-                transition-all duration-200
-                hover:bg-primary-light active:scale-[0.98]
-              "
-            >
-              Cek Harga
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          <div className="flex flex-col px-8 pt-24 pb-8 h-full">
+            {/* Mobile Nav Links */}
+            <div className="flex flex-col gap-1">
+              {NAV_LINKS.map((link) => {
+                const isActive = pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(link.href));
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`
+                      py-3 px-2 text-[13px] font-bold tracking-[0.08em] uppercase
+                      border-b border-border/50
+                      transition-colors duration-200
+                      ${
+                        isActive
+                          ? "text-primary"
+                          : "text-text-secondary hover:text-primary"
+                      }
+                    `}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Mobile CTA */}
+            <div className="mt-8">
+              <Link
+                href="/contact"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="
+                  flex items-center justify-center w-full
+                  rounded-md bg-primary px-6 py-4
+                  text-[13px] font-bold tracking-[0.08em] text-white uppercase
+                  transition-all duration-200
+                  hover:bg-primary-light active:scale-[0.98]
+                "
               >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
+                BOOK NOW
+              </Link>
+            </div>
           </div>
         </div>
       </div>
