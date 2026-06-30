@@ -90,7 +90,22 @@ export default function ScrollSequence() {
   useEffect(() => {
     let loadedCount = 0;
 
+    // Load first frame immediately for instant paint
+    const firstImg = new Image();
+    firstImg.src = formatFrame(0);
+    firstImg.onload = () => {
+      imagesRef.current[0] = firstImg;
+      // If canvas is already sized, draw immediately
+      drawImage(0);
+    };
+
     for (let i = 0; i < TOTAL_FRAMES; i++) {
+      if (i === 0) {
+        loadedCount++;
+        setLoadProgress(Math.round((loadedCount / TOTAL_FRAMES) * 100));
+        continue;
+      }
+
       const img = new Image();
       img.src = formatFrame(i);
       img.onload = () => {
@@ -101,7 +116,6 @@ export default function ScrollSequence() {
         }
       };
       img.onerror = () => {
-        // Fail-safe logic
         loadedCount++;
         if (loadedCount === TOTAL_FRAMES) {
           setIsLoading(false);
@@ -115,6 +129,29 @@ export default function ScrollSequence() {
       imagesRef.current = [];
     };
   }, []);
+
+  // Debounced resize handler to prevent layout thrashing
+  useEffect(() => {
+    if (isLoading) return;
+
+    let timeoutId: NodeJS.Timeout;
+    
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleResize();
+      }, 100); // 100ms debounce
+    };
+
+    // Initialize sizes once loaded
+    handleResize();
+
+    window.addEventListener("resize", debouncedResize);
+    return () => {
+      window.removeEventListener("resize", debouncedResize);
+      clearTimeout(timeoutId);
+    };
+  }, [isLoading]);
 
   // Update caption text efficiently based on active frame
   const updateCaption = (idx: number) => {
@@ -141,14 +178,9 @@ export default function ScrollSequence() {
     setActiveStep((prev) => (prev !== step ? step : prev));
   };
 
-  // Setup GSAP animation triggering after loading completes
   useGSAP(
     () => {
       if (isLoading) return;
-
-      // Initialize sizes
-      handleResize();
-      window.addEventListener("resize", handleResize);
 
       // Animation target
       const frameObj = { index: 0 };
@@ -176,7 +208,6 @@ export default function ScrollSequence() {
       });
 
       return () => {
-        window.removeEventListener("resize", handleResize);
         scrollTriggerInstance.kill();
       };
     },
@@ -204,8 +235,12 @@ export default function ScrollSequence() {
       ) : (
         // Fullscreen Interactive Scroll Teardown Display
         <div className="relative w-full h-screen overflow-hidden">
-          {/* Main Fullscreen Canvas */}
-          <canvas ref={canvasRef} className="w-full h-full object-cover block" />
+          {/* Main Fullscreen Canvas - promoted to GPU with will-change */}
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full object-cover block"
+            style={{ willChange: "transform" }}
+          />
 
           {/* HUD Overlay Interface */}
           <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-between pointer-events-none z-10">

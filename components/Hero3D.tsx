@@ -2,7 +2,7 @@
 
 import { useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Html, useProgress, Center } from "@react-three/drei";
+import { useGLTF, Html, useProgress, Center, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
 // Custom loader using diagnostic technical design matching our specs
@@ -59,7 +59,7 @@ function DeviceModel() {
       <Center>
         <primitive
           object={scene}
-          scale={4.5} // Adjust scale for Phone 17 Pro Max Simple.glb
+          scale={30} // Adjust scale for Phone 17 Pro Max Simple.glb
           rotation={[0, Math.PI / 1.1, 0]} // Present default angled view
         />
       </Center>
@@ -75,12 +75,20 @@ export default function Hero3D() {
       
       <Canvas
         camera={{ position: [0, 0, 8], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{
+          antialias: true,
+          alpha: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.0,
+        }}
         className="w-full h-full"
       >
         <Suspense fallback={<DiagnosticLoader />}>
+          {/* Environment map for realistic reflections on metallic surfaces */}
+          <Environment preset="city" />
+
           {/* Ambient Lighting */}
-          <ambientLight intensity={0.6} />
+          <ambientLight intensity={0.4} />
 
           {/* Key Light */}
           <directionalLight

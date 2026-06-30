@@ -35,6 +35,11 @@ export default function RootLayout({
       lang="id"
       className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="preload" href="/sequence/frame_000000.jpg" as="image" />
+        <link rel="preload" href="/sequence/frame_000001.jpg" as="image" />
+        <link rel="preload" href="/sequence/frame_000002.jpg" as="image" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Navbar />
         <main className="flex-1">{children}</main>
