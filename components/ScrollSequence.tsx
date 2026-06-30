@@ -290,10 +290,10 @@ export default function ScrollSequence() {
             <h2
               style={{
                 fontFamily: "var(--font-bayon), sans-serif",
-                fontSize: "clamp(36px, 6.5vw, 120px)",
+                fontSize: "clamp(36px, 5.5vw, 100px)",
                 lineHeight: 0.9,
                 letterSpacing: "-0.01em",
-                color: "#ffffff",
+                color: "var(--fixmi-primary)",
                 textTransform: "uppercase" as const,
                 margin: 0,
               }}
@@ -306,7 +306,7 @@ export default function ScrollSequence() {
                 fontSize: "clamp(14px, 1.1vw, 18px)",
                 fontWeight: 400,
                 lineHeight: 1.6,
-                color: "rgba(255, 255, 255, 0.8)",
+                color: "var(--fixmi-text-secondary)",
                 margin: "24px 0 0 0",
                 maxWidth: "600px",
               }}
