@@ -158,7 +158,12 @@ function DiagnosticLoader({ progress }: { progress: number }) {
   );
 }
 
-function MagicShaderPlane({ textures }: { textures: TexturesState }) {
+interface MagicShaderPlaneProps {
+  textures: TexturesState;
+  isHoveredRef: React.RefObject<boolean>;
+}
+
+function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
 
   // Image aspect ratio is square (1.0)
@@ -205,6 +210,17 @@ function MagicShaderPlane({ textures }: { textures: TexturesState }) {
     // Get time step (clamped to avoid jumps)
     const deltaT = Math.min(state.clock.getDelta(), 0.1);
 
+    // If pointer is hovering anywhere within the Hero canvas
+    if (isHoveredRef.current) {
+      // Map state.pointer [-1, 1] relative to the overall Canvas viewport to UV coordinates [0, 1] on the plane
+      const targetX = state.pointer.x * (viewportWidth / (2.0 * planeWidth)) + 0.5;
+      const targetY = state.pointer.y * (viewportHeight / (2.0 * planeHeight)) + 0.5;
+      targetMouse.current.set(targetX, targetY);
+    } else {
+      // Reset target position to center when cursor is outside the Hero section
+      targetMouse.current.set(0.5, 0.5);
+    }
+
     // Calculate mouse velocity (delta distance) in UV space
     const delta = targetMouse.current.distanceTo(prevMouseRef.current);
     
@@ -235,24 +251,8 @@ function MagicShaderPlane({ textures }: { textures: TexturesState }) {
     materialRef.current.uniforms.uTrail.value = trailRef.current;
   });
 
-  // Raycast intersection handler to map cursor directly to UV coordinates
-  const handlePointerMove = (e: any) => {
-    if (e.uv) {
-      targetMouse.current.copy(e.uv);
-    }
-  };
-
-  const handlePointerLeave = () => {
-    // Return to center when mouse leaves
-    targetMouse.current.set(0.5, 0.5);
-  };
-
   return (
-    <mesh 
-      scale={[planeWidth, planeHeight, 1]}
-      onPointerMove={handlePointerMove} 
-      onPointerLeave={handlePointerLeave}
-    >
+    <mesh scale={[planeWidth, planeHeight, 1]}>
       <planeGeometry args={[1, 1]} />
       <shaderMaterial
         ref={materialRef}
@@ -268,6 +268,7 @@ function MagicShaderPlane({ textures }: { textures: TexturesState }) {
 export default function Hero3D() {
   const [textures, setTextures] = useState<TexturesState | null>(null);
   const [progress, setProgress] = useState<number>(0);
+  const isHoveredRef = useRef<boolean>(false);
 
   useEffect(() => {
     const manager = new THREE.LoadingManager();
@@ -301,7 +302,13 @@ export default function Hero3D() {
   }, []);
 
   return (
-    <div className="w-full h-[100dvh] relative overflow-hidden select-none">
+    <div 
+      className="w-full h-[100dvh] relative overflow-hidden select-none"
+      onPointerOver={() => { isHoveredRef.current = true; }}
+      onPointerMove={() => { isHoveredRef.current = true; }}
+      onPointerOut={() => { isHoveredRef.current = false; }}
+      onPointerLeave={() => { isHoveredRef.current = false; }}
+    >
       {!textures ? (
         <DiagnosticLoader progress={progress} />
       ) : (
@@ -310,7 +317,7 @@ export default function Hero3D() {
           gl={{ antialias: true, alpha: true }}
           className="w-full h-full"
         >
-          <MagicShaderPlane textures={textures} />
+          <MagicShaderPlane textures={textures} isHoveredRef={isHoveredRef} />
         </Canvas>
       )}
     </div>
