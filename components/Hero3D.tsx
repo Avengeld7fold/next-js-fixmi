@@ -188,7 +188,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     materialRef.current.uniforms.uViewportAspect.value = currentAspect;
 
     // Determine target reveal status based on combination of pointer coordinates inside Hero and R3F overlay
-    const activeHover = isHovered.current && isHoveredRef.current;
+    const activeHover = isHovered.current || isHoveredRef.current;
 
     // Lerp visibility state smoothly
     materialRef.current.uniforms.uReveal.value = THREE.MathUtils.lerp(
@@ -198,7 +198,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     );
 
     // Map pointer position NDC [-1, 1] to UV space [0, 1] relative to the overall Canvas
-    if (isHoveredRef.current) {
+    if (activeHover) {
       const targetX = state.pointer.x * 0.5 + 0.5;
       const targetY = state.pointer.y * 0.5 + 0.5;
       targetMouse.current.set(targetX, targetY);
@@ -219,6 +219,9 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
       scale={[viewportWidth, viewportHeight, 1]}
       onPointerOver={() => { isHovered.current = true; }}
       onPointerOut={() => { isHovered.current = false; }}
+      onPointerDown={() => { isHovered.current = true; }}
+      onPointerUp={() => { isHovered.current = false; }}
+      onPointerCancel={() => { isHovered.current = false; }}
     >
       <planeGeometry args={[1, 1]} />
       <shaderMaterial
@@ -270,11 +273,14 @@ export default function Hero3D() {
 
   return (
     <div 
-      className="w-full h-full relative overflow-hidden select-none cursor-none"
+      className="w-full h-full relative overflow-hidden select-none cursor-none touch-pan-y"
       onPointerOver={() => { isHoveredRef.current = true; }}
       onPointerMove={() => { isHoveredRef.current = true; }}
       onPointerOut={() => { isHoveredRef.current = false; }}
       onPointerLeave={() => { isHoveredRef.current = false; }}
+      onPointerDown={() => { isHoveredRef.current = true; }}
+      onPointerUp={() => { isHoveredRef.current = false; }}
+      onPointerCancel={() => { isHoveredRef.current = false; }}
     >
       {!textures ? (
         <DiagnosticLoader progress={progress} />
@@ -282,7 +288,7 @@ export default function Hero3D() {
         <Canvas
           camera={{ position: [0, 0, 1], fov: 90 }}
           gl={{ antialias: true, alpha: true }}
-          className="w-full h-full"
+          className="w-full h-full touch-pan-y"
         >
           <MagicShaderPlane textures={textures} isHoveredRef={isHoveredRef} />
         </Canvas>
