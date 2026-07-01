@@ -74,7 +74,7 @@ export default function RootLayout({
         <link rel="preload" href="/sequence/frame_000001.jpg" as="image" />
         <link rel="preload" href="/sequence/frame_000002.jpg" as="image" />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
         <Navbar />
         <main className="flex-1">{children}</main>
       </body>
