@@ -13,14 +13,13 @@ const vertexShader = `
   }
 `;
 
-// Fragment shader: 2.5D parallax depth shift combined with Metaball Liquid Trail & Velocity-based Noise (aspect ratio centered mapping)
+// Fragment shader: 2.5D parallax depth shift combined with Lando Norris Exact Blob Masking (Supports PNG transparency)
 const fragmentShader = `
   uniform sampler2D uTextureBroken;
   uniform sampler2D uTextureFixed;
   uniform sampler2D uDepthMap;
-  uniform vec2 uTrail[15];
-  uniform float uVelocity;
-  uniform float uActiveTime;
+  uniform vec2 uMouse;
+  uniform float uTime;
   uniform float uViewportAspect;
   varying vec2 vUv;
 
@@ -62,19 +61,6 @@ const fragmentShader = `
     return 2.3 * n_xy;
   }
 
-  // 2D Rotation function
-  vec2 rotate2D(vec2 v, float angle) {
-    float s = sin(angle);
-    float c = cos(angle);
-    return vec2(v.x * c - v.y * s, v.x * s + v.y * c);
-  }
-
-  // Polynomial Smooth Minimum (Quadratic blending) for Metaball merging
-  float smin(float a, float b, float k) {
-    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
-    return mix(b, a, h) - k * h * (1.0 - h);
-  }
-
   void main() {
     // 1. Calculate texture UV mapped to center of the viewport (contain fit)
     // Aspect ratio of textures is 1.0 (square)
@@ -96,66 +82,44 @@ const fragmentShader = `
       depth = texture2D(uDepthMap, textureUv).r;
     }
 
-    // 3. Parallax Effect: shift the coordinates based on newest trail point (uTrail[14]) and depth
-    vec2 mouseOffset = uTrail[14] - vec2(0.5);
-    vec2 parallaxUv = textureUv + mouseOffset * depth * 0.015;
+    // 3. Parallax Effect: shift the coordinates based on mouse position (uMouse) and depth
+    vec2 mouseOffset = uMouse - vec2(0.5);
+    vec2 distortedUv = textureUv + mouseOffset * depth * 0.015;
 
     // Re-check bounds for parallax UV
-    bool inParallaxBounds = (parallaxUv.x >= 0.0 && parallaxUv.x <= 1.0 && parallaxUv.y >= 0.0 && parallaxUv.y <= 1.0);
+    bool inParallaxBounds = (distortedUv.x >= 0.0 && distortedUv.x <= 1.0 && distortedUv.y >= 0.0 && distortedUv.y <= 1.0);
 
-    // 4. Sample default alpha
-    float alpha = 0.0;
+    // 4. Sample broken and fixed textures using parallax-displaced UVs
     vec4 colorBroken = vec4(0.0);
     vec4 colorFixed = vec4(0.0);
     
     if (inParallaxBounds) {
-      alpha = texture2D(uTextureBroken, parallaxUv).a;
-      colorBroken = texture2D(uTextureBroken, parallaxUv);
-      colorFixed = texture2D(uTextureFixed, parallaxUv);
+      colorBroken = texture2D(uTextureBroken, distortedUv);
+      colorFixed = texture2D(uTextureFixed, distortedUv);
     }
 
-    // 5. Metaball Trail Field calculation (Smooth Minimum) in canvas UV space (vUv)
-    // Smaller radius (0.02 to 0.08) and higher smin k-factor (0.25) for highly viscous, stretchy oil effect
-    float trailField = 9999.0;
-    for (int i = 0; i < 15; i++) {
-      float radius = 0.02 + 0.06 * (float(i) / 14.0);
-      float d = distance(vUv, uTrail[i]) - radius;
-      trailField = smin(trailField, d, 0.25);
-    }
+    // 5. Exact Lando Norris Blob Math
+    // Calculate pure distance from parallax displaced UV to mouse cursor in canvas space (vUv)
+    float dist = distance(vUv, uMouse);
 
-    // 6. Low frequency Dynamic Velocity-based Noise with absolute cursor offset randomization
-    float fastTime = uActiveTime * 5.0;
-    vec2 noiseCoords = rotate2D(vUv, uActiveTime * 0.1) * 3.5 + vec2(uActiveTime * 0.5) + (uTrail[14] * 2.0);
-    float n = cnoise(noiseCoords);
+    // Generate slow-moving organic noise on large scale (frequency 3.0, time factor 0.3)
+    float noiseVal = cnoise(vUv * 3.0 + (uTime * 0.3)) * 0.15;
 
-    // Amplitudo noise scales proportionally with velocity. Highly cohesive and smooth when static.
-    float dynamicAmplitude = 0.005 + (uVelocity * 0.25);
-    float distortedField = trailField + n * dynamicAmplitude;
+    // Distort distance with noise to create blob shape
+    float blob = dist + noiseVal;
 
-    // 7. Sharp smoothstep for distinct, glossy liquid oil drop edges
-    float mask = smoothstep(-0.005, 0.005, distortedField);
+    // 6. Large radius soft edge masking
+    // Area close to cursor (blob < 0.15) becomes 1.0 (Fixed), and fades to 0.0 (Broken) at 0.4
+    float mask = 1.0 - smoothstep(0.15, 0.4, blob);
 
-    // 8. Blending fixed (inside trail) and broken (outside)
-    vec3 blendedColor = mix(colorFixed.rgb, colorBroken.rgb, mask);
+    // 7. Blending colors based on soft mask
+    vec4 finalColor = mix(colorBroken, colorFixed, mask);
 
-    // 9. Sharp glowing liquid border energy outline (#f26a21 orange)
-    float borderGlow = smoothstep(0.0, 0.02, abs(mask - 0.5));
-    borderGlow = 1.0 - borderGlow;
-    vec3 glowColor = vec3(0.95, 0.42, 0.13); // #f26a21 orange
-    vec3 finalColor = mix(blendedColor, glowColor, borderGlow * 0.4);
+    // 8. Logika Alpha Discard to support background transparency
+    if (finalColor.a < 0.1) discard;
 
-    // 10. To allow the orange glow to render outside the phone bounds (over the transparent canvas background),
-    // we set the final alpha to include the border glow opacity
-    float finalAlpha = max(alpha, borderGlow * 0.8 * (1.0 - mask)); // only glow inside/near trail
-    if (!inParallaxBounds) {
-      finalAlpha = borderGlow * 0.8 * (1.0 - mask);
-    }
-
-    // Early discard for pixel rendering efficiency
-    if (finalAlpha < 0.05) discard;
-
-    // 11. Output final color
-    gl_FragColor = vec4(finalColor, finalAlpha);
+    // Output final color
+    gl_FragColor = finalColor;
   }
 `;
 
@@ -194,77 +158,45 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
 
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   
-  // Physics tracking refs
+  // Clean single-point mouse tracking refs
   const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
   const mouseRef = useRef(new THREE.Vector2(0.5, 0.5));
-  
-  const trailRef = useRef<THREE.Vector2[]>(
-    Array.from({ length: 15 }, () => new THREE.Vector2(0.5, 0.5))
-  );
-  const velocityRef = useRef<number>(0);
-  const activeTimeRef = useRef<number>(0);
-  const prevMouseRef = useRef<THREE.Vector2>(new THREE.Vector2(0.5, 0.5));
 
   // Initialize uniforms
   const uniforms = useRef({
     uTextureBroken: { value: textures.broken },
     uTextureFixed: { value: textures.fixed },
     uDepthMap: { value: textures.depth },
-    uTrail: { value: trailRef.current },
-    uVelocity: { value: 0 },
-    uActiveTime: { value: 0 },
+    uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+    uTime: { value: 0 },
     uViewportAspect: { value: viewportWidth / viewportHeight },
   });
 
   useFrame((state) => {
     if (!materialRef.current) return;
 
-    // Get time step (clamped to avoid jumps)
-    const deltaT = Math.min(state.clock.getDelta(), 0.1);
+    // Update time uniform continuously
+    materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
 
-    // Sync viewport aspect dynamically (in case of resize)
+    // Sync viewport aspect dynamically
     const currentAspect = viewportWidth / viewportHeight;
     materialRef.current.uniforms.uViewportAspect.value = currentAspect;
 
-    // If pointer is hovering anywhere within the Hero canvas
+    // Map pointer position NDC [-1, 1] to UV space [0, 1] relative to the overall Canvas
     if (isHoveredRef.current) {
-      // Map state.pointer [-1, 1] relative to the overall Canvas viewport directly to UV coordinates [0, 1]
       const targetX = state.pointer.x * 0.5 + 0.5;
       const targetY = state.pointer.y * 0.5 + 0.5;
       targetMouse.current.set(targetX, targetY);
     } else {
-      // Reset target position to center when cursor is outside the Hero section
+      // Return to center when mouse leaves the Hero container
       targetMouse.current.set(0.5, 0.5);
     }
 
-    // Calculate mouse velocity (delta distance) in canvas UV space
-    const delta = targetMouse.current.distanceTo(prevMouseRef.current);
-    
-    // Smooth velocity with lerp (inertia)
-    velocityRef.current = THREE.MathUtils.lerp(velocityRef.current, delta, 0.1);
-
-    // Update active time only when the cursor is moving
-    if (velocityRef.current > 0.001) {
-      activeTimeRef.current += deltaT;
-    }
-
-    // Shift mouse coordinates in history trail
-    for (let i = 0; i < 14; i++) {
-      trailRef.current[i].copy(trailRef.current[i + 1]);
-    }
-    
-    // Smooth the newest trail point towards the target
+    // Lerp kursor coordinate for natural motion delay
     mouseRef.current.x = THREE.MathUtils.lerp(mouseRef.current.x, targetMouse.current.x, 0.08);
     mouseRef.current.y = THREE.MathUtils.lerp(mouseRef.current.y, targetMouse.current.y, 0.08);
-    trailRef.current[14].copy(mouseRef.current);
 
-    // Store target coordinates for next frame's physics check
-    prevMouseRef.current.copy(targetMouse.current);
-
-    // Sync references to uniforms
-    materialRef.current.uniforms.uVelocity.value = velocityRef.current;
-    materialRef.current.uniforms.uActiveTime.value = activeTimeRef.current;
-    materialRef.current.uniforms.uTrail.value = trailRef.current;
+    materialRef.current.uniforms.uMouse.value.copy(mouseRef.current);
   });
 
   return (
