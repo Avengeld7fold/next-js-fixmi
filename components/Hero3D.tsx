@@ -14,7 +14,7 @@ const vertexShader = `
   }
 `;
 
-// Fragment shader: 2.5D parallax depth shift combined with liquid magic repair brush
+// Fragment shader: 2.5D parallax depth shift combined with liquid magic repair brush (supports PNG transparency)
 const fragmentShader = `
   uniform sampler2D uTextureBroken;
   uniform sampler2D uTextureFixed;
@@ -48,10 +48,16 @@ const fragmentShader = `
     vec2 parallaxUv = vUv + mouseOffset * depth * 0.015;
     parallaxUv = clamp(parallaxUv, 0.0, 1.0);
 
-    // 3. Magic Repair Brush (Distance tracking in UV space)
+    // 3. Extract alpha from texture at the parallax-displaced UVs
+    float alpha = texture2D(uTextureBroken, parallaxUv).a;
+
+    // Early discard for transparent background areas (GPU efficiency)
+    if (alpha < 0.1) discard;
+
+    // 4. Magic Repair Brush (Distance tracking in UV space)
     float dist = distance(parallaxUv, uMouse);
 
-    // 4. Liquid Transition / Magic Wave effect using noise
+    // 5. Liquid Transition / Magic Wave effect using noise
     float noiseFactor = noise(parallaxUv * 12.0 + uTime * 2.0);
     
     // Base brush size with dynamic wavy distortion
@@ -63,20 +69,21 @@ const fragmentShader = `
     // Outside: brushMask approaches 0.0 (broken phone visible)
     float brushMask = 1.0 - smoothstep(distortedRadius - 0.05, distortedRadius + 0.05, dist);
 
-    // 5. Sampling the broken and fixed textures using the parallax-displaced UVs
+    // 6. Sampling the broken and fixed textures using the parallax-displaced UVs
     vec4 colorBroken = texture2D(uTextureBroken, parallaxUv);
     vec4 colorFixed = texture2D(uTextureFixed, parallaxUv);
 
-    // 6. Blending using our magic repair brush mask
+    // 7. Blending using our magic repair brush mask
     vec4 finalColor = mix(colorBroken, colorFixed, brushMask);
 
-    // 7. Orange project magic brush glowing boundary line (#f26a21)
+    // 8. Orange project magic brush glowing boundary line (#f26a21)
     float borderGlow = smoothstep(0.0, 0.015, abs(dist - distortedRadius));
     borderGlow = 1.0 - borderGlow;
     vec4 glowColor = vec4(0.95, 0.42, 0.13, 1.0); // #f26a21 orange
     finalColor = mix(finalColor, glowColor, borderGlow * 0.35);
 
-    gl_FragColor = finalColor;
+    // 9. Output final color with correct alpha channel transparency
+    gl_FragColor = vec4(finalColor.rgb, alpha);
   }
 `;
 
@@ -105,30 +112,21 @@ function DiagnosticLoader() {
 function MagicShaderPlane() {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
   
-  // Load textures
-  const uTextureBroken = useTexture("/images/iphone-broken.jpeg");
-  const uTextureFixed = useTexture("/images/iphone-fixed.jpeg");
-  const uDepthMap = useTexture("/images/iphone-depth.jpeg");
+  // Load PNG textures
+  const uTextureBroken = useTexture("/images/iphone-broken.png");
+  const uTextureFixed = useTexture("/images/iphone-fixed.png");
+  const uDepthMap = useTexture("/images/iphone-depth.png");
 
   // Ensure textures use linear filtering for smooth rendering
   uTextureBroken.minFilter = THREE.LinearFilter;
   uTextureFixed.minFilter = THREE.LinearFilter;
   uDepthMap.minFilter = THREE.LinearFilter;
 
-  // Calculate correct proportions (2752 x 1536 aspect ratio = 1.79167)
-  const imageAspect = 2752 / 1536;
-  const viewportAspect = viewportWidth / viewportHeight;
+  // Image is square (1500 x 1500 aspect ratio = 1.0)
+  const imageAspect = 1.0;
 
-  let planeWidth = viewportWidth;
-  let planeHeight = viewportHeight;
-
-  if (imageAspect > viewportAspect) {
-    // Viewport is vertically taller than the image aspect, fit width and scale down height
-    planeHeight = viewportWidth / imageAspect;
-  } else {
-    // Viewport is horizontally wider than the image aspect, fit height and scale down width
-    planeWidth = viewportHeight * imageAspect;
-  }
+  // Scale plane responsively to fit inside the viewport without stretching
+  const minSize = Math.min(viewportWidth, viewportHeight);
 
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
@@ -169,13 +167,18 @@ function MagicShaderPlane() {
   };
 
   return (
-    <mesh onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
-      <planeGeometry args={[planeWidth, planeHeight]} />
+    <mesh 
+      scale={[minSize, minSize, 1]}
+      onPointerMove={handlePointerMove} 
+      onPointerLeave={handlePointerLeave}
+    >
+      <planeGeometry args={[1, 1]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms.current}
+        transparent={true}
       />
     </mesh>
   );
@@ -183,7 +186,7 @@ function MagicShaderPlane() {
 
 export default function Hero3D() {
   return (
-    <div className="relative w-full h-[300px] md:h-[380px] lg:h-[480px] xl:h-[540px] select-none rounded-2xl overflow-hidden border border-border/50 bg-black/20">
+    <div className="w-full h-[100dvh] relative overflow-hidden select-none">
       <Canvas
         camera={{ position: [0, 0, 1], fov: 90 }}
         gl={{ antialias: true, alpha: true }}
