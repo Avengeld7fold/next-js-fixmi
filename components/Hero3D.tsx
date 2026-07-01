@@ -103,7 +103,7 @@ function DiagnosticLoader() {
 }
 
 function MagicShaderPlane() {
-  const { width, height } = useThree((state) => state.viewport);
+  const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
   
   // Load textures
   const uTextureBroken = useTexture("/images/iphone-broken.jpeg");
@@ -115,7 +115,23 @@ function MagicShaderPlane() {
   uTextureFixed.minFilter = THREE.LinearFilter;
   uDepthMap.minFilter = THREE.LinearFilter;
 
+  // Calculate correct proportions (2752 x 1536 aspect ratio = 1.79167)
+  const imageAspect = 2752 / 1536;
+  const viewportAspect = viewportWidth / viewportHeight;
+
+  let planeWidth = viewportWidth;
+  let planeHeight = viewportHeight;
+
+  if (imageAspect > viewportAspect) {
+    // Viewport is vertically taller than the image aspect, fit width and scale down height
+    planeHeight = viewportWidth / imageAspect;
+  } else {
+    // Viewport is horizontally wider than the image aspect, fit height and scale down width
+    planeWidth = viewportHeight * imageAspect;
+  }
+
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
   const mouseRef = useRef(new THREE.Vector2(0.5, 0.5));
 
   // Initialize uniforms
@@ -133,19 +149,28 @@ function MagicShaderPlane() {
     // Update uTime
     materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
 
-    // Lerped pointer location in UV coordinates (0 to 1 mapping)
-    const targetX = (state.pointer.x + 1.0) / 2.0;
-    const targetY = (state.pointer.y + 1.0) / 2.0;
-
-    mouseRef.current.x = THREE.MathUtils.lerp(mouseRef.current.x, targetX, 0.08);
-    mouseRef.current.y = THREE.MathUtils.lerp(mouseRef.current.y, targetY, 0.08);
+    // Smoothly lerp mouse coordinates to the target intersection position
+    mouseRef.current.x = THREE.MathUtils.lerp(mouseRef.current.x, targetMouse.current.x, 0.08);
+    mouseRef.current.y = THREE.MathUtils.lerp(mouseRef.current.y, targetMouse.current.y, 0.08);
 
     materialRef.current.uniforms.uMouse.value.copy(mouseRef.current);
   });
 
+  // Accurate mouse tracking directly on the 3D plane using raycasted UV coordinates
+  const handlePointerMove = (e: any) => {
+    if (e.uv) {
+      targetMouse.current.copy(e.uv);
+    }
+  };
+
+  const handlePointerLeave = () => {
+    // Smoothly return the brush to the center when mouse leaves
+    targetMouse.current.set(0.5, 0.5);
+  };
+
   return (
-    <mesh>
-      <planeGeometry args={[width, height]} />
+    <mesh onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave}>
+      <planeGeometry args={[planeWidth, planeHeight]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
