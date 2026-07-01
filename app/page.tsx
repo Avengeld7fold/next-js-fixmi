@@ -39,15 +39,21 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden">
+      {/* Hero Section with cursor-none to hide browser pointer */}
+      <section className="relative flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden cursor-none">
         {/* Background gradient orbs */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/4 top-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
           <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-accent/4 blur-[100px]" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-8 md:px-12 lg:px-16 py-16 lg:py-0">
+        {/* WebGL Canvas background overlay filling the entire Hero section */}
+        <div className="absolute inset-0 z-0">
+          <Hero3D />
+        </div>
+
+        {/* Content grid sitting on top - pointer-events-none lets mouse interact with Canvas below */}
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-8 md:px-12 lg:px-16 py-16 lg:py-0 pointer-events-none">
           {/* 3-Column Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-0 lg:-mt-20">
 
@@ -71,10 +77,8 @@ export default function Home() {
               </h1>
             </div>
 
-            {/* Center Column — 3D Model */}
-            <div className="lg:col-span-4 flex items-center justify-center w-full min-h-[320px] lg:min-h-[500px]">
-              <Hero3D />
-            </div>
+            {/* Center Column — Empty layout spacer since Canvas is absolute backdrop */}
+            <div className="lg:col-span-4 flex items-center justify-center w-full min-h-[320px] lg:min-h-[500px]" />
 
             {/* Right Column — Big Title + Subtitle */}
             <div className="lg:col-span-4 flex flex-col justify-end items-center lg:items-end text-center lg:text-right lg:translate-y-8">

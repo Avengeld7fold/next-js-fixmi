@@ -318,7 +318,7 @@ export default function Hero3D() {
 
   return (
     <div 
-      className="w-full h-[100dvh] relative overflow-hidden select-none cursor-none"
+      className="w-full h-full relative overflow-hidden select-none cursor-none"
       onPointerOver={() => { isHoveredRef.current = true; }}
       onPointerMove={() => { isHoveredRef.current = true; }}
       onPointerOut={() => { isHoveredRef.current = false; }}
