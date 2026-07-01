@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, Suspense } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useTexture, Html, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 
 // Vertex shader
@@ -87,56 +86,58 @@ const fragmentShader = `
   }
 `;
 
-function DiagnosticLoader() {
-  const { progress } = useProgress();
+interface TexturesState {
+  broken: THREE.Texture;
+  fixed: THREE.Texture;
+  depth: THREE.Texture;
+}
+
+function DiagnosticLoader({ progress }: { progress: number }) {
   return (
-    <Html center>
-      <div className="flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none w-64">
-        <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
-          INITIALIZING WEBGL 2.5D SHADER
-        </div>
-        <div className="w-full h-1 bg-surface-alt border border-border rounded overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all duration-150 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="mt-2 text-[10px] text-text-muted uppercase">
-          Texture Bindings: {Math.round(progress)}%
-        </div>
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-background z-20">
+      <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
+        INITIALIZING WEBGL 2.5D SHADER
       </div>
-    </Html>
+      <div className="w-64 h-1 bg-surface-alt border border-border rounded overflow-hidden">
+        <div
+          className="h-full bg-primary transition-all duration-150 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="mt-2 text-[10px] text-text-muted uppercase">
+        Texture Bindings: {Math.round(progress)}%
+      </div>
+    </div>
   );
 }
 
-function MagicShaderPlane() {
+function MagicShaderPlane({ textures }: { textures: TexturesState }) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
-  
-  // Load PNG textures
-  const uTextureBroken = useTexture("/images/iphone-broken.png");
-  const uTextureFixed = useTexture("/images/iphone-fixed.png");
-  const uDepthMap = useTexture("/images/iphone-depth.png");
 
-  // Ensure textures use linear filtering for smooth rendering
-  uTextureBroken.minFilter = THREE.LinearFilter;
-  uTextureFixed.minFilter = THREE.LinearFilter;
-  uDepthMap.minFilter = THREE.LinearFilter;
-
-  // Image is square (1500 x 1500 aspect ratio = 1.0)
+  // Image aspect ratio is square (1.0)
   const imageAspect = 1.0;
+  const viewportAspect = viewportWidth / viewportHeight;
 
-  // Scale plane responsively to fit inside the viewport without stretching
-  const minSize = Math.min(viewportWidth, viewportHeight);
+  let planeWidth = viewportWidth;
+  let planeHeight = viewportHeight;
+
+  if (imageAspect > viewportAspect) {
+    // Viewport is vertically taller than the image aspect, fit width and scale down height
+    planeHeight = viewportWidth / imageAspect;
+  } else {
+    // Viewport is horizontally wider than the image aspect, fit height and scale down width
+    planeWidth = viewportHeight * imageAspect;
+  }
 
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
   const mouseRef = useRef(new THREE.Vector2(0.5, 0.5));
 
-  // Initialize uniforms
+  // Initialize uniforms with preloaded textures
   const uniforms = useRef({
-    uTextureBroken: { value: uTextureBroken },
-    uTextureFixed: { value: uTextureFixed },
-    uDepthMap: { value: uDepthMap },
+    uTextureBroken: { value: textures.broken },
+    uTextureFixed: { value: textures.fixed },
+    uDepthMap: { value: textures.depth },
     uMouse: { value: new THREE.Vector2(0.5, 0.5) },
     uTime: { value: 0 },
   });
@@ -154,7 +155,7 @@ function MagicShaderPlane() {
     materialRef.current.uniforms.uMouse.value.copy(mouseRef.current);
   });
 
-  // Accurate mouse tracking directly on the 3D plane using raycasted UV coordinates
+  // Accurate mouse tracking directly on the plane using raycasted UV coordinates
   const handlePointerMove = (e: any) => {
     if (e.uv) {
       targetMouse.current.copy(e.uv);
@@ -168,7 +169,7 @@ function MagicShaderPlane() {
 
   return (
     <mesh 
-      scale={[minSize, minSize, 1]}
+      scale={[planeWidth, planeHeight, 1]}
       onPointerMove={handlePointerMove} 
       onPointerLeave={handlePointerLeave}
     >
@@ -185,17 +186,53 @@ function MagicShaderPlane() {
 }
 
 export default function Hero3D() {
+  const [textures, setTextures] = useState<TexturesState | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+
+  useEffect(() => {
+    const manager = new THREE.LoadingManager();
+    const loader = new THREE.TextureLoader(manager);
+
+    let brokenTex: THREE.Texture;
+    let fixedTex: THREE.Texture;
+    let depthTex: THREE.Texture;
+
+    manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      setProgress((itemsLoaded / itemsTotal) * 100);
+    };
+
+    manager.onLoad = () => {
+      // Ensure textures use linear filtering for smooth rendering
+      brokenTex.minFilter = THREE.LinearFilter;
+      fixedTex.minFilter = THREE.LinearFilter;
+      depthTex.minFilter = THREE.LinearFilter;
+
+      // Set state to trigger Canvas mount
+      setTextures({
+        broken: brokenTex,
+        fixed: fixedTex,
+        depth: depthTex,
+      });
+    };
+
+    brokenTex = loader.load("/images/iphone-broken.png");
+    fixedTex = loader.load("/images/iphone-fixed.png");
+    depthTex = loader.load("/images/iphone-depth.png");
+  }, []);
+
   return (
     <div className="w-full h-[100dvh] relative overflow-hidden select-none">
-      <Canvas
-        camera={{ position: [0, 0, 1], fov: 90 }}
-        gl={{ antialias: true, alpha: true }}
-        className="w-full h-full"
-      >
-        <Suspense fallback={<DiagnosticLoader />}>
-          <MagicShaderPlane />
-        </Suspense>
-      </Canvas>
+      {!textures ? (
+        <DiagnosticLoader progress={progress} />
+      ) : (
+        <Canvas
+          camera={{ position: [0, 0, 1], fov: 90 }}
+          gl={{ antialias: true, alpha: true }}
+          className="w-full h-full"
+        >
+          <MagicShaderPlane textures={textures} />
+        </Canvas>
+      )}
     </div>
   );
 }
