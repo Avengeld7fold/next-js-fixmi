@@ -78,14 +78,15 @@ const fragmentShader = `
     bool inBounds = (textureUv.x >= 0.0 && textureUv.x <= 1.0 && textureUv.y >= 0.0 && textureUv.y <= 1.0);
 
     // 2. Read depth map value (only if within bounds to avoid wrapping artifacts)
-    float depth = 0.0;
+    float depthValue = 0.0;
     if (inBounds) {
-      depth = texture2D(uDepthMap, textureUv).r;
+      depthValue = texture2D(uDepthMap, textureUv).r;
     }
 
     // 3. Parallax Effect: shift the coordinates based on mouse position (uMouse) and depth
-    vec2 mouseOffset = uMouse - vec2(0.5);
-    vec2 distortedUv = textureUv + mouseOffset * depth * 0.015;
+    float depthIntensity = 0.05;
+    vec2 parallaxOffset = (uMouse - vec2(0.5)) * depthValue * depthIntensity;
+    vec2 distortedUv = textureUv + parallaxOffset;
 
     // Re-check bounds for parallax UV
     bool inParallaxBounds = (distortedUv.x >= 0.0 && distortedUv.x <= 1.0 && distortedUv.y >= 0.0 && distortedUv.y <= 1.0);
@@ -257,6 +258,14 @@ export default function Hero3D() {
       brokenTex.minFilter = THREE.LinearFilter;
       fixedTex.minFilter = THREE.LinearFilter;
       depthTex.minFilter = THREE.LinearFilter;
+
+      // Enable ClampToEdgeWrapping for extreme parallax offsets
+      brokenTex.wrapS = THREE.ClampToEdgeWrapping;
+      brokenTex.wrapT = THREE.ClampToEdgeWrapping;
+      fixedTex.wrapS = THREE.ClampToEdgeWrapping;
+      fixedTex.wrapT = THREE.ClampToEdgeWrapping;
+      depthTex.wrapS = THREE.ClampToEdgeWrapping;
+      depthTex.wrapT = THREE.ClampToEdgeWrapping;
 
       // Set state to trigger Canvas mount
       setTextures({
