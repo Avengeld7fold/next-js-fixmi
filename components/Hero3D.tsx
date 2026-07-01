@@ -84,7 +84,7 @@ const fragmentShader = `
     }
 
     // 3. Parallax Effect: shift the coordinates based on mouse position (uMouse) and depth
-    float depthIntensity = 0.05;
+    float depthIntensity = 0.02;
     vec2 parallaxOffset = (uMouse - vec2(0.5)) * depthValue * depthIntensity;
     vec2 distortedUv = textureUv + parallaxOffset;
 
