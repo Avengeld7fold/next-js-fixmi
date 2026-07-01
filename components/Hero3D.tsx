@@ -115,30 +115,31 @@ const fragmentShader = `
     }
 
     // 5. Metaball Trail Field calculation (Smooth Minimum) in canvas UV space (vUv)
-    // We compute the trail using vUv directly so the trail can wander anywhere over the viewport
+    // Smaller radius (0.02 to 0.08) and higher smin k-factor (0.25) for highly viscous, stretchy oil effect
     float trailField = 9999.0;
     for (int i = 0; i < 15; i++) {
-      float radius = 0.05 + 0.17 * (float(i) / 14.0);
+      float radius = 0.02 + 0.06 * (float(i) / 14.0);
       float d = distance(vUv, uTrail[i]) - radius;
-      trailField = smin(trailField, d, 0.15);
+      trailField = smin(trailField, d, 0.25);
     }
 
-    // 6. Dynamic Velocity-based Noise
+    // 6. Low frequency Dynamic Velocity-based Noise with absolute cursor offset randomization
     float fastTime = uActiveTime * 5.0;
-    vec2 noiseCoords = rotate2D(vUv, uActiveTime * 0.2) * 10.0 + fastTime;
+    vec2 noiseCoords = rotate2D(vUv, uActiveTime * 0.1) * 3.5 + vec2(uActiveTime * 0.5) + (uTrail[14] * 2.0);
     float n = cnoise(noiseCoords);
 
-    float dynamicAmplitude = 0.05 + (uVelocity * 0.5);
+    // Amplitudo noise scales proportionally with velocity. Highly cohesive and smooth when static.
+    float dynamicAmplitude = 0.005 + (uVelocity * 0.25);
     float distortedField = trailField + n * dynamicAmplitude;
 
-    // 7. Smooth step to create organic liquid mask
-    float mask = smoothstep(-0.03, 0.03, distortedField);
+    // 7. Sharp smoothstep for distinct, glossy liquid oil drop edges
+    float mask = smoothstep(-0.005, 0.005, distortedField);
 
     // 8. Blending fixed (inside trail) and broken (outside)
     vec3 blendedColor = mix(colorFixed.rgb, colorBroken.rgb, mask);
 
-    // 9. Glowing liquid border energy wave (#f26a21 orange)
-    float borderGlow = smoothstep(0.0, 0.05, abs(mask - 0.5));
+    // 9. Sharp glowing liquid border energy outline (#f26a21 orange)
+    float borderGlow = smoothstep(0.0, 0.02, abs(mask - 0.5));
     borderGlow = 1.0 - borderGlow;
     vec3 glowColor = vec3(0.95, 0.42, 0.13); // #f26a21 orange
     vec3 finalColor = mix(blendedColor, glowColor, borderGlow * 0.4);
