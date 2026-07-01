@@ -13,7 +13,7 @@ const vertexShader = `
   }
 `;
 
-// Fragment shader: 2.5D parallax depth shift combined with Metaball Liquid Trail & Velocity-based Noise
+// Fragment shader: 2.5D parallax depth shift combined with Metaball Liquid Trail & Velocity-based Noise (aspect ratio centered mapping)
 const fragmentShader = `
   uniform sampler2D uTextureBroken;
   uniform sampler2D uTextureFixed;
@@ -21,6 +21,7 @@ const fragmentShader = `
   uniform vec2 uTrail[15];
   uniform float uVelocity;
   uniform float uActiveTime;
+  uniform float uViewportAspect;
   varying vec2 vUv;
 
   // Classic Perlin 2D Noise
@@ -75,61 +76,85 @@ const fragmentShader = `
   }
 
   void main() {
-    // 1. Read depth map value at current UV coordinates
-    float depth = texture2D(uDepthMap, vUv).r;
+    // 1. Calculate texture UV mapped to center of the viewport (contain fit)
+    // Aspect ratio of textures is 1.0 (square)
+    vec2 textureUv = vUv;
+    if (uViewportAspect > 1.0) {
+      // Landscape: fit height, scale and center width
+      textureUv.x = (vUv.x - 0.5) * uViewportAspect + 0.5;
+    } else {
+      // Portrait: fit width, scale and center height
+      textureUv.y = (vUv.y - 0.5) / uViewportAspect + 0.5;
+    }
 
-    // 2. Parallax Effect: shift the UV coordinates based on newest trail point (uTrail[14]) and depth
-    // Center is 0.5. uTrail[14] is the active cursor position.
+    // Check if the current pixel is inside the square texture boundaries
+    bool inBounds = (textureUv.x >= 0.0 && textureUv.x <= 1.0 && textureUv.y >= 0.0 && textureUv.y <= 1.0);
+
+    // 2. Read depth map value (only if within bounds to avoid wrapping artifacts)
+    float depth = 0.0;
+    if (inBounds) {
+      depth = texture2D(uDepthMap, textureUv).r;
+    }
+
+    // 3. Parallax Effect: shift the coordinates based on newest trail point (uTrail[14]) and depth
     vec2 mouseOffset = uTrail[14] - vec2(0.5);
-    vec2 parallaxUv = vUv + mouseOffset * depth * 0.015;
-    parallaxUv = clamp(parallaxUv, 0.0, 1.0);
+    vec2 parallaxUv = textureUv + mouseOffset * depth * 0.015;
 
-    // 3. Extract alpha from texture at the parallax-displaced UVs
-    float alpha = texture2D(uTextureBroken, parallaxUv).a;
+    // Re-check bounds for parallax UV
+    bool inParallaxBounds = (parallaxUv.x >= 0.0 && parallaxUv.x <= 1.0 && parallaxUv.y >= 0.0 && parallaxUv.y <= 1.0);
 
-    // Early discard for transparent background areas (GPU efficiency)
-    if (alpha < 0.1) discard;
-
-    // 4. Metaball Trail Field calculation (Smooth Minimum)
-    float trailField = 9999.0;
+    // 4. Sample default alpha
+    float alpha = 0.0;
+    vec4 colorBroken = vec4(0.0);
+    vec4 colorFixed = vec4(0.0);
     
+    if (inParallaxBounds) {
+      alpha = texture2D(uTextureBroken, parallaxUv).a;
+      colorBroken = texture2D(uTextureBroken, parallaxUv);
+      colorFixed = texture2D(uTextureFixed, parallaxUv);
+    }
+
+    // 5. Metaball Trail Field calculation (Smooth Minimum) in canvas UV space (vUv)
+    // We compute the trail using vUv directly so the trail can wander anywhere over the viewport
+    float trailField = 9999.0;
     for (int i = 0; i < 15; i++) {
-      // Tapered radius: newest points (i = 14) are larger, older points (i = 0) are smaller
       float radius = 0.05 + 0.17 * (float(i) / 14.0);
-      float d = distance(parallaxUv, uTrail[i]) - radius;
-      
-      // Merge metaballs smoothly (blend factor k = 0.15)
+      float d = distance(vUv, uTrail[i]) - radius;
       trailField = smin(trailField, d, 0.15);
     }
 
-    // 5. Dynamic Velocity-based Noise
+    // 6. Dynamic Velocity-based Noise
     float fastTime = uActiveTime * 5.0;
-    vec2 noiseCoords = rotate2D(parallaxUv, uActiveTime * 0.2) * 10.0 + fastTime;
+    vec2 noiseCoords = rotate2D(vUv, uActiveTime * 0.2) * 10.0 + fastTime;
     float n = cnoise(noiseCoords);
 
-    // Amplitude is dynamically driven by cursor velocity (uVelocity)
-    // Noise ripples wildly when moving, and settles to static when cursor stops
     float dynamicAmplitude = 0.05 + (uVelocity * 0.5);
     float distortedField = trailField + n * dynamicAmplitude;
 
-    // 6. Smooth step to create organic liquid mask (threshold around boundary 0.0)
+    // 7. Smooth step to create organic liquid mask
     float mask = smoothstep(-0.03, 0.03, distortedField);
 
-    // 7. Sampling broken and fixed textures using parallax-displaced UVs
-    vec4 colorBroken = texture2D(uTextureBroken, parallaxUv);
-    vec4 colorFixed = texture2D(uTextureFixed, parallaxUv);
-
-    // 8. Blending fixed (inside trail) and broken (outside) organically
+    // 8. Blending fixed (inside trail) and broken (outside)
     vec3 blendedColor = mix(colorFixed.rgb, colorBroken.rgb, mask);
 
-    // 9. Glowing liquid border energy wave (#f26a21 orange) matching transition line
+    // 9. Glowing liquid border energy wave (#f26a21 orange)
     float borderGlow = smoothstep(0.0, 0.05, abs(mask - 0.5));
     borderGlow = 1.0 - borderGlow;
     vec3 glowColor = vec3(0.95, 0.42, 0.13); // #f26a21 orange
     vec3 finalColor = mix(blendedColor, glowColor, borderGlow * 0.4);
 
-    // 10. Output final color with transparency
-    gl_FragColor = vec4(finalColor, alpha);
+    // 10. To allow the orange glow to render outside the phone bounds (over the transparent canvas background),
+    // we set the final alpha to include the border glow opacity
+    float finalAlpha = max(alpha, borderGlow * 0.8 * (1.0 - mask)); // only glow inside/near trail
+    if (!inParallaxBounds) {
+      finalAlpha = borderGlow * 0.8 * (1.0 - mask);
+    }
+
+    // Early discard for pixel rendering efficiency
+    if (finalAlpha < 0.05) discard;
+
+    // 11. Output final color
+    gl_FragColor = vec4(finalColor, finalAlpha);
   }
 `;
 
@@ -166,21 +191,6 @@ interface MagicShaderPlaneProps {
 function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
 
-  // Image aspect ratio is square (1.0)
-  const imageAspect = 1.0;
-  const viewportAspect = viewportWidth / viewportHeight;
-
-  let planeWidth = viewportWidth;
-  let planeHeight = viewportHeight;
-
-  if (imageAspect > viewportAspect) {
-    // Viewport is vertically taller than the image aspect, fit width and scale down height
-    planeHeight = viewportWidth / imageAspect;
-  } else {
-    // Viewport is horizontally wider than the image aspect, fit height and scale down width
-    planeWidth = viewportHeight * imageAspect;
-  }
-
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   
   // Physics tracking refs
@@ -194,7 +204,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   const activeTimeRef = useRef<number>(0);
   const prevMouseRef = useRef<THREE.Vector2>(new THREE.Vector2(0.5, 0.5));
 
-  // Initialize uniforms with preloaded textures and dynamic tracking buffers
+  // Initialize uniforms
   const uniforms = useRef({
     uTextureBroken: { value: textures.broken },
     uTextureFixed: { value: textures.fixed },
@@ -202,6 +212,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     uTrail: { value: trailRef.current },
     uVelocity: { value: 0 },
     uActiveTime: { value: 0 },
+    uViewportAspect: { value: viewportWidth / viewportHeight },
   });
 
   useFrame((state) => {
@@ -210,18 +221,22 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     // Get time step (clamped to avoid jumps)
     const deltaT = Math.min(state.clock.getDelta(), 0.1);
 
+    // Sync viewport aspect dynamically (in case of resize)
+    const currentAspect = viewportWidth / viewportHeight;
+    materialRef.current.uniforms.uViewportAspect.value = currentAspect;
+
     // If pointer is hovering anywhere within the Hero canvas
     if (isHoveredRef.current) {
-      // Map state.pointer [-1, 1] relative to the overall Canvas viewport to UV coordinates [0, 1] on the plane
-      const targetX = state.pointer.x * (viewportWidth / (2.0 * planeWidth)) + 0.5;
-      const targetY = state.pointer.y * (viewportHeight / (2.0 * planeHeight)) + 0.5;
+      // Map state.pointer [-1, 1] relative to the overall Canvas viewport directly to UV coordinates [0, 1]
+      const targetX = state.pointer.x * 0.5 + 0.5;
+      const targetY = state.pointer.y * 0.5 + 0.5;
       targetMouse.current.set(targetX, targetY);
     } else {
       // Reset target position to center when cursor is outside the Hero section
       targetMouse.current.set(0.5, 0.5);
     }
 
-    // Calculate mouse velocity (delta distance) in UV space
+    // Calculate mouse velocity (delta distance) in canvas UV space
     const delta = targetMouse.current.distanceTo(prevMouseRef.current);
     
     // Smooth velocity with lerp (inertia)
@@ -242,7 +257,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     mouseRef.current.y = THREE.MathUtils.lerp(mouseRef.current.y, targetMouse.current.y, 0.08);
     trailRef.current[14].copy(mouseRef.current);
 
-    // Store target coordinates for next frame's physics delta check
+    // Store target coordinates for next frame's physics check
     prevMouseRef.current.copy(targetMouse.current);
 
     // Sync references to uniforms
@@ -252,7 +267,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   });
 
   return (
-    <mesh scale={[planeWidth, planeHeight, 1]}>
+    <mesh scale={[viewportWidth, viewportHeight, 1]}>
       <planeGeometry args={[1, 1]} />
       <shaderMaterial
         ref={materialRef}
@@ -303,7 +318,7 @@ export default function Hero3D() {
 
   return (
     <div 
-      className="w-full h-[100dvh] relative overflow-hidden select-none"
+      className="w-full h-[100dvh] relative overflow-hidden select-none cursor-none"
       onPointerOver={() => { isHoveredRef.current = true; }}
       onPointerMove={() => { isHoveredRef.current = true; }}
       onPointerOut={() => { isHoveredRef.current = false; }}
