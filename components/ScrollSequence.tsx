@@ -32,6 +32,7 @@ export default function ScrollSequence() {
     "Mendeteksi secara mikro setiap titik kerusakan pada struktur sirkuit internal perangkat Anda melalui pemindaian telemetri digital menyeluruh."
   );
   const [activeStep, setActiveStep] = useState<string>("01 / 05");
+  const [activeStepProgress, setActiveStepProgress] = useState<number>(0);
 
   // Cover calculation for drawing images on Canvas without stretching
   const drawImage = (index: number) => {
@@ -158,32 +159,42 @@ export default function ScrollSequence() {
     let title = "";
     let detail = "";
     let step = "";
+    let progress = 0;
 
     if (idx < 35) {
       title = "DIAGNOSIS PRESISI.";
       detail = "Mendeteksi secara mikro setiap titik kerusakan pada struktur sirkuit internal perangkat Anda melalui pemindaian telemetri digital menyeluruh.";
       step = "01 / 05";
+      progress = idx / 34;
     } else if (idx < 75) {
       title = "DEKONSOLIDASI AMAN.";
       detail = "Pelepasan panel display OLED menggunakan suhu panas yang terkalibrasi khusus guna melindungi sirkuit display dan lapisan sensitif di bawahnya.";
       step = "02 / 05";
+      progress = (idx - 35) / (74 - 35);
     } else if (idx < 120) {
       title = "UJI MOTHERBOARD.";
       detail = "Melakukan pengujian isolasi arus dan kalibrasi daya pada jalur sirkuit utama untuk memastikan stabilitas kelistrikan tanpa risiko korsleting.";
       step = "03 / 05";
+      progress = (idx - 75) / (119 - 75);
     } else if (idx < 160) {
       title = "REPARASI MIKRO.";
       detail = "Proses micro-soldering presisi tinggi pada konektor sirkuit dan port daya menggunakan mikroskop optik modern oleh teknisi tersertifikasi.";
       step = "04 / 05";
+      progress = (idx - 120) / (159 - 120);
     } else {
       title = "KALIBRASI TOTAL.";
       detail = "Pemasangan kembali komponen dengan sealant tahan air standar pabrikan, diikuti uji kelayakan fungsi diagnostik menyeluruh.";
       step = "05 / 05";
+      progress = (idx - 160) / (192 - 160);
     }
 
     setActiveTitle((prev) => (prev !== title ? title : prev));
     setActiveDetail((prev) => (prev !== detail ? detail : prev));
     setActiveStep((prev) => (prev !== step ? step : prev));
+    
+    // Clamp progress between 0 and 1
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+    setActiveStepProgress(clampedProgress);
   };
 
   useGSAP(
@@ -313,6 +324,75 @@ export default function ScrollSequence() {
             >
               {activeDetail}
             </p>
+          </div>
+
+          {/* Vertical Progress Navigation Dot Bar */}
+          <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex flex-col gap-6 items-end pointer-events-none z-10 select-none">
+            {[
+              { id: 0, label: "DIAGNOSIS", stepCode: "01 / 05" },
+              { id: 1, label: "DEMONTASI", stepCode: "02 / 05" },
+              { id: 2, label: "UJI SIRKUIT", stepCode: "03 / 05" },
+              { id: 3, label: "REPARASI", stepCode: "04 / 05" },
+              { id: 4, label: "KALIBRASI", stepCode: "05 / 05" },
+            ].map((s) => {
+              const isActive = activeStep === s.stepCode;
+              return (
+                <div key={s.id} className="flex items-center justify-end h-10">
+                  {/* Step Label (Only shown if active) */}
+                  {isActive && (
+                    <span 
+                      className="font-mono text-[10px] tracking-widest text-white/90 mr-3 transition-opacity duration-300"
+                      style={{
+                        fontFamily: "var(--font-neue-montreal), sans-serif",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {s.label}
+                    </span>
+                  )}
+                  
+                  {/* Indicator Dot / Circle */}
+                  <div className="relative flex items-center justify-center w-10 h-10">
+                    {isActive ? (
+                      <>
+                        {/* Circular Progress SVG */}
+                        <svg className="absolute w-10 h-10 transform -rotate-90">
+                          {/* Background Circle Track */}
+                          <circle
+                            cx="20"
+                            cy="20"
+                            r="12"
+                            className="stroke-white/10"
+                            strokeWidth="1.5"
+                            fill="transparent"
+                          />
+                          {/* Animated Foreground Circle Progress */}
+                          <circle
+                            cx="20"
+                            cy="20"
+                            r="12"
+                            className="stroke-primary"
+                            strokeWidth="2"
+                            fill="transparent"
+                            strokeDasharray={2 * Math.PI * 12}
+                            strokeDashoffset={2 * Math.PI * 12 * (1 - activeStepProgress)}
+                            strokeLinecap="round"
+                            style={{
+                              transition: "stroke-dashoffset 0.1s ease-out",
+                            }}
+                          />
+                        </svg>
+                        {/* Central Active Dot */}
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      </>
+                    ) : (
+                      /* Inactive simple dot */
+                      <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
