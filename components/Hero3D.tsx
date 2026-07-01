@@ -13,7 +13,7 @@ const vertexShader = `
   }
 `;
 
-// Fragment shader: 2.5D parallax depth shift combined with Lando Norris Exact Blob Masking (Supports PNG transparency)
+// Fragment shader: 2.5D parallax depth shift combined with Lando Norris Exact Blob Masking & Visibility transition
 const fragmentShader = `
   uniform sampler2D uTextureBroken;
   uniform sampler2D uTextureFixed;
@@ -21,6 +21,7 @@ const fragmentShader = `
   uniform vec2 uMouse;
   uniform float uTime;
   uniform float uViewportAspect;
+  uniform float uReveal;
   varying vec2 vUv;
 
   // Classic Perlin 2D Noise
@@ -108,9 +109,9 @@ const fragmentShader = `
     // Distort distance with noise to create blob shape
     float blob = dist + noiseVal;
 
-    // 6. Large radius soft edge masking
+    // 6. Large radius soft edge masking multiplied by uReveal for visibility control
     // Area close to cursor (blob < 0.15) becomes 1.0 (Fixed), and fades to 0.0 (Broken) at 0.4
-    float mask = 1.0 - smoothstep(0.15, 0.4, blob);
+    float mask = (1.0 - smoothstep(0.15, 0.4, blob)) * uReveal;
 
     // 7. Blending colors based on soft mask
     vec4 finalColor = mix(colorBroken, colorFixed, mask);
@@ -162,7 +163,10 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
   const mouseRef = useRef(new THREE.Vector2(0.5, 0.5));
 
-  // Initialize uniforms
+  // Local isHovered ref to track R3F pointer interaction
+  const isHovered = useRef(false);
+
+  // Initialize uniforms including uReveal
   const uniforms = useRef({
     uTextureBroken: { value: textures.broken },
     uTextureFixed: { value: textures.fixed },
@@ -170,6 +174,7 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     uMouse: { value: new THREE.Vector2(0.5, 0.5) },
     uTime: { value: 0 },
     uViewportAspect: { value: viewportWidth / viewportHeight },
+    uReveal: { value: 0.0 },
   });
 
   useFrame((state) => {
@@ -181,6 +186,16 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     // Sync viewport aspect dynamically
     const currentAspect = viewportWidth / viewportHeight;
     materialRef.current.uniforms.uViewportAspect.value = currentAspect;
+
+    // Determine target reveal status based on combination of pointer coordinates inside Hero and R3F overlay
+    const activeHover = isHovered.current && isHoveredRef.current;
+
+    // Lerp visibility state smoothly
+    materialRef.current.uniforms.uReveal.value = THREE.MathUtils.lerp(
+      materialRef.current.uniforms.uReveal.value,
+      activeHover ? 1.0 : 0.0,
+      0.05
+    );
 
     // Map pointer position NDC [-1, 1] to UV space [0, 1] relative to the overall Canvas
     if (isHoveredRef.current) {
@@ -200,7 +215,11 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   });
 
   return (
-    <mesh scale={[viewportWidth, viewportHeight, 1]}>
+    <mesh 
+      scale={[viewportWidth, viewportHeight, 1]}
+      onPointerOver={() => { isHovered.current = true; }}
+      onPointerOut={() => { isHovered.current = false; }}
+    >
       <planeGeometry args={[1, 1]} />
       <shaderMaterial
         ref={materialRef}
