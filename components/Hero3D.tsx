@@ -1,18 +1,92 @@
 "use client";
 
 import { useRef, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Html, useProgress, Center, Environment } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useTexture, Html, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 
-// Custom loader using diagnostic technical design matching our specs
+// Vertex shader
+const vertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+// Fragment shader: 2.5D parallax depth shift combined with liquid magic repair brush
+const fragmentShader = `
+  uniform sampler2D uTextureBroken;
+  uniform sampler2D uTextureFixed;
+  uniform sampler2D uDepthMap;
+  uniform vec2 uMouse;
+  uniform float uTime;
+  varying vec2 vUv;
+
+  // 2D Noise function for the liquid transition edge wave
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+  }
+
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+  }
+
+  void main() {
+    // 1. Read depth map value at current UV coordinates
+    float depth = texture2D(uDepthMap, vUv).r;
+
+    // 2. Parallax Effect: shift the UV coordinates based on mouse position and depth
+    // uMouse goes from 0.0 (bottom-left) to 1.0 (top-right). Center is 0.5.
+    vec2 mouseOffset = uMouse - vec2(0.5);
+    
+    // Parallax displacement intensity (0.015 gives a subtle 2.5D depth movement)
+    vec2 parallaxUv = vUv + mouseOffset * depth * 0.015;
+    parallaxUv = clamp(parallaxUv, 0.0, 1.0);
+
+    // 3. Magic Repair Brush (Distance tracking in UV space)
+    float dist = distance(parallaxUv, uMouse);
+
+    // 4. Liquid Transition / Magic Wave effect using noise
+    float noiseFactor = noise(parallaxUv * 12.0 + uTime * 2.0);
+    
+    // Base brush size with dynamic wavy distortion
+    float brushRadius = 0.22;
+    float distortedRadius = brushRadius + noiseFactor * 0.04;
+
+    // Smooth edge mask of the magic repair brush
+    // Inside: brushMask approaches 1.0 (fixed phone visible)
+    // Outside: brushMask approaches 0.0 (broken phone visible)
+    float brushMask = 1.0 - smoothstep(distortedRadius - 0.05, distortedRadius + 0.05, dist);
+
+    // 5. Sampling the broken and fixed textures using the parallax-displaced UVs
+    vec4 colorBroken = texture2D(uTextureBroken, parallaxUv);
+    vec4 colorFixed = texture2D(uTextureFixed, parallaxUv);
+
+    // 6. Blending using our magic repair brush mask
+    vec4 finalColor = mix(colorBroken, colorFixed, brushMask);
+
+    // 7. Orange project magic brush glowing boundary line (#f26a21)
+    float borderGlow = smoothstep(0.0, 0.015, abs(dist - distortedRadius));
+    borderGlow = 1.0 - borderGlow;
+    vec4 glowColor = vec4(0.95, 0.42, 0.13, 1.0); // #f26a21 orange
+    finalColor = mix(finalColor, glowColor, borderGlow * 0.35);
+
+    gl_FragColor = finalColor;
+  }
+`;
+
 function DiagnosticLoader() {
   const { progress } = useProgress();
   return (
     <Html center>
       <div className="flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none w-64">
         <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
-          INITIALIZING 3D ENGINE
+          INITIALIZING WEBGL 2.5D SHADER
         </div>
         <div className="w-full h-1 bg-surface-alt border border-border rounded overflow-hidden">
           <div
@@ -21,109 +95,79 @@ function DiagnosticLoader() {
           />
         </div>
         <div className="mt-2 text-[10px] text-text-muted uppercase">
-          Mesh Calibration: {Math.round(progress)}%
+          Texture Bindings: {Math.round(progress)}%
         </div>
       </div>
     </Html>
   );
 }
 
-// Inner component to handle loading and mouse tracking
-function DeviceModel() {
-  // Load local GLB model
-  const { scene } = useGLTF("/models/iphone.glb");
-  const groupRef = useRef<THREE.Group>(null);
+function MagicShaderPlane() {
+  const { width, height } = useThree((state) => state.viewport);
+  
+  // Load textures
+  const uTextureBroken = useTexture("/images/iphone-broken.jpeg");
+  const uTextureFixed = useTexture("/images/iphone-fixed.jpeg");
+  const uDepthMap = useTexture("/images/iphone-depth.jpeg");
 
-  // Smooth mouse-tracking rotation using lerp
+  // Ensure textures use linear filtering for smooth rendering
+  uTextureBroken.minFilter = THREE.LinearFilter;
+  uTextureFixed.minFilter = THREE.LinearFilter;
+  uDepthMap.minFilter = THREE.LinearFilter;
+
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const mouseRef = useRef(new THREE.Vector2(0.5, 0.5));
+
+  // Initialize uniforms
+  const uniforms = useRef({
+    uTextureBroken: { value: uTextureBroken },
+    uTextureFixed: { value: uTextureFixed },
+    uDepthMap: { value: uDepthMap },
+    uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+    uTime: { value: 0 },
+  });
+
   useFrame((state) => {
-    if (!groupRef.current) return;
+    if (!materialRef.current) return;
 
-    // pointer coordinates range from -1 to 1
-    const targetX = state.pointer.y * 0.4;
-    const targetY = state.pointer.x * 0.4;
+    // Update uTime
+    materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
 
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
-      targetX,
-      0.06
-    );
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
-      targetY,
-      0.06
-    );
+    // Lerped pointer location in UV coordinates (0 to 1 mapping)
+    const targetX = (state.pointer.x + 1.0) / 2.0;
+    const targetY = (state.pointer.y + 1.0) / 2.0;
+
+    mouseRef.current.x = THREE.MathUtils.lerp(mouseRef.current.x, targetX, 0.08);
+    mouseRef.current.y = THREE.MathUtils.lerp(mouseRef.current.y, targetY, 0.08);
+
+    materialRef.current.uniforms.uMouse.value.copy(mouseRef.current);
   });
 
   return (
-    <group ref={groupRef}>
-      <Center>
-        <primitive
-          object={scene}
-          scale={30} // Adjust scale for Phone 17 Pro Max Simple.glb
-          rotation={[0, Math.PI / 1.1, 0]} // Present default angled view
-        />
-      </Center>
-    </group>
+    <mesh>
+      <planeGeometry args={[width, height]} />
+      <shaderMaterial
+        ref={materialRef}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        uniforms={uniforms.current}
+      />
+    </mesh>
   );
 }
 
 export default function Hero3D() {
   return (
-    <div className="relative w-full h-[300px] md:h-[380px] lg:h-[480px] xl:h-[540px] select-none">
+    <div className="relative w-full h-[300px] md:h-[380px] lg:h-[480px] xl:h-[540px] select-none rounded-2xl overflow-hidden border border-border/50 bg-black/20">
       <Canvas
-        camera={{ position: [0, 0, 8], fov: 45 }}
-        gl={{
-          antialias: true,
-          alpha: true,
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.0,
-        }}
+        camera={{ position: [0, 0, 1], fov: 90 }}
+        gl={{ antialias: true, alpha: true }}
         className="w-full h-full"
       >
         <Suspense fallback={<DiagnosticLoader />}>
-          {/* Environment map for realistic reflections on metallic surfaces */}
-          <Environment preset="city" />
-
-          {/* Ambient Lighting */}
-          <ambientLight intensity={0.4} />
-
-          {/* Key Light */}
-          <directionalLight
-            position={[5, 8, 5]}
-            intensity={2.0}
-            color="#ffffff"
-          />
-
-          {/* Warm Fill Light */}
-          <directionalLight
-            position={[-5, 3, -5]}
-            intensity={0.8}
-            color="#f26a21" // Copper warm fill
-          />
-
-          {/* Precision Rim Lights to highlight metal contours */}
-          <spotLight
-            position={[0, 8, 2]}
-            angle={0.5}
-            penumbra={1}
-            intensity={2}
-            color="#ffffff"
-          />
-
-          <spotLight
-            position={[5, -5, -5]}
-            angle={0.8}
-            penumbra={1}
-            intensity={1.5}
-            color="#f26a21" // Orange highlights
-          />
-
-          <DeviceModel />
+          <MagicShaderPlane />
         </Suspense>
       </Canvas>
     </div>
   );
 }
-
-// Preload the model to avoid pop-in
-useGLTF.preload("/models/iphone.glb");
