@@ -13,12 +13,12 @@ const vertexShader = `
   }
 `;
 
-// Fragment shader: 2.5D parallax depth shift combined with Lando Norris Exact Blob Masking & Visibility transition
+// Fragment shader: 2.5D parallax depth shift combined with Fruit Ninja style Liquid Slash Masking
 const fragmentShader = `
   uniform sampler2D uTextureBroken;
   uniform sampler2D uTextureFixed;
   uniform sampler2D uDepthMap;
-  uniform vec2 uMouse;
+  uniform vec2 uTrail[15];
   uniform float uTime;
   uniform float uViewportAspect;
   uniform float uReveal;
@@ -62,6 +62,19 @@ const fragmentShader = `
     return 2.3 * n_xy;
   }
 
+  // Signed Distance to Line Segment function
+  float sdLine( vec2 p, vec2 a, vec2 b ) {
+    vec2 pa = p - a, ba = b - a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h );
+  }
+
+  // Polynomial Smooth Minimum (Quadratic blending)
+  float smin(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+  }
+
   void main() {
     // 1. Calculate texture UV mapped to center of the viewport (contain fit)
     // Aspect ratio of textures is 1.0 (square)
@@ -83,9 +96,10 @@ const fragmentShader = `
       depthValue = texture2D(uDepthMap, textureUv).r;
     }
 
-    // 3. Parallax Effect: shift the coordinates based on mouse position (uMouse) and depth
+    // 3. Parallax Effect: shift the coordinates based on newest mouse position (uTrail[0]) and depth
     float depthIntensity = uViewportAspect > 1.0 ? 0.02 : 0.012;
-    vec2 parallaxOffset = (uMouse - vec2(0.5)) * depthValue * depthIntensity;
+    vec2 mouseOffset = uTrail[0] - vec2(0.5);
+    vec2 parallaxOffset = mouseOffset * depthValue * depthIntensity;
     vec2 distortedUv = textureUv + parallaxOffset;
 
     // Re-check bounds for parallax UV
@@ -100,24 +114,29 @@ const fragmentShader = `
       colorFixed = texture2D(uTextureFixed, distortedUv);
     }
 
-    // 5. Exact Lando Norris Blob Math
-    // Calculate pure distance from parallax displaced UV to mouse cursor in canvas space (vUv)
-    float dist = distance(vUv, uMouse);
+    // 5. Calculate Fruit Ninja style Liquid Slash Masking
+    // Compute distance to the continuous trail line segments
+    float slashDist = 100.0;
+    for (int i = 0; i < 14; i++) {
+      // Tapering radius: index 0 (newest pointer position) is thickest (0.12), index 14 is sharpest (0.0)
+      float radius = mix(0.12, 0.0, float(i) / 14.0);
+      float d = sdLine(distortedUv, uTrail[i], uTrail[i+1]) - radius;
+      slashDist = smin(slashDist, d, 0.05);
+    }
 
-    // Generate slow-moving organic noise on large scale (frequency 3.0, time factor 0.3)
-    float noiseVal = cnoise(vUv * 3.0 + (uTime * 0.3)) * 0.15;
+    // Add fast-moving organic liquid noise on te tebasan edges
+    slashDist += cnoise(distortedUv * 5.0 - vec2(uTime * 3.0)) * 0.04;
 
-    // Distort distance with noise to create blob shape
-    float blob = dist + noiseVal;
+    // Sharp but anti-aliased smoothstep boundary mask
+    float mask = 1.0 - smoothstep(0.0, 0.02, slashDist);
 
-    // 6. Large radius soft edge masking multiplied by uReveal for visibility control
-    // Area close to cursor (blob < 0.15) becomes 1.0 (Fixed), and fades to 0.0 (Broken) at 0.4
-    float mask = (1.0 - smoothstep(0.15, 0.4, blob)) * uReveal;
+    // Combine with uReveal for hover state visibility control
+    mask *= uReveal;
 
-    // 7. Blending colors based on soft mask
+    // 6. Blending colors based on soft mask
     vec4 finalColor = mix(colorBroken, colorFixed, mask);
 
-    // 8. Logika Alpha Discard to support background transparency
+    // 7. Logika Alpha Discard to support background transparency
     if (finalColor.a < 0.1) discard;
 
     // Output final color
@@ -155,24 +174,47 @@ interface MagicShaderPlaneProps {
   isHoveredRef: React.RefObject<boolean>;
 }
 
+const TRAIL_LENGTH = 15;
+
 function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
 
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   
-  // Clean single-point mouse tracking refs
-  const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
-  const mouseRef = useRef(new THREE.Vector2(0.5, 0.5));
-
-  // Local isHovered ref to track R3F pointer interaction
+  // R3F mesh overlay hover tracking
   const isHovered = useRef(false);
 
-  // Initialize uniforms including uReveal
+  // Mobile Device orientation tilt values (retained from gyroscope implementation for smooth fallback)
+  const deviceTilt = useRef(new THREE.Vector2(0, 0));
+
+  // Initialize unique Vector2 objects in the trail history buffer
+  const trailRef = useRef<THREE.Vector2[]>(
+    Array.from({ length: TRAIL_LENGTH }, () => new THREE.Vector2(0.5, 0.5))
+  );
+
+  // Listen to mobile gyroscope tilt
+  useEffect(() => {
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      if (e.beta !== null && e.gamma !== null) {
+        const tiltX = e.gamma / 30.0;
+        const tiltY = (e.beta - 60.0) / 30.0;
+        deviceTilt.current.set(
+          Math.max(-1.0, Math.min(1.0, tiltX)),
+          Math.max(-1.0, Math.min(1.0, tiltY))
+        );
+      }
+    };
+
+    window.addEventListener("deviceorientation", handleOrientation);
+    return () => window.removeEventListener("deviceorientation", handleOrientation);
+  }, []);
+
+  // Initialize uniforms
   const uniforms = useRef({
     uTextureBroken: { value: textures.broken },
     uTextureFixed: { value: textures.fixed },
     uDepthMap: { value: textures.depth },
-    uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+    uTrail: { value: trailRef.current },
     uTime: { value: 0 },
     uViewportAspect: { value: viewportWidth / viewportHeight },
     uReveal: { value: 0.0 },
@@ -188,31 +230,39 @@ function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
     const currentAspect = viewportWidth / viewportHeight;
     materialRef.current.uniforms.uViewportAspect.value = currentAspect;
 
-    // Determine target reveal status based on combination of pointer coordinates inside Hero and R3F overlay
+    // Combine pointer states
     const activeHover = isHovered.current || isHoveredRef.current;
 
-    // Lerp visibility state smoothly
+    // Lerp visibility uReveal smoothly
     materialRef.current.uniforms.uReveal.value = THREE.MathUtils.lerp(
       materialRef.current.uniforms.uReveal.value,
       activeHover ? 1.0 : 0.0,
       0.05
     );
 
-    // Map pointer position NDC [-1, 1] to UV space [0, 1] relative to the overall Canvas
+    // Shift trail values in array buffer: index i takes the value of index i-1
+    for (let i = TRAIL_LENGTH - 1; i > 0; i--) {
+      trailRef.current[i].copy(trailRef.current[i - 1]);
+    }
+
+    // Map pointer position NDC [-1, 1] to UV space [0, 1] relative to Canvas, or use Gyro fallback
     if (activeHover) {
       const targetX = state.pointer.x * 0.5 + 0.5;
       const targetY = state.pointer.y * 0.5 + 0.5;
-      targetMouse.current.set(targetX, targetY);
+      trailRef.current[0].set(targetX, targetY);
     } else {
-      // Return to center when mouse leaves the Hero container
-      targetMouse.current.set(0.5, 0.5);
+      // Gyroscope/inertia fallback: if phone tilt is active, shift coordinate, else drift back to (0.5, 0.5)
+      if (deviceTilt.current.length() > 0.01) {
+        const targetX = deviceTilt.current.x * 0.5 + 0.5;
+        const targetY = deviceTilt.current.y * 0.5 + 0.5;
+        trailRef.current[0].lerp(new THREE.Vector2(targetX, targetY), 0.05);
+      } else {
+        trailRef.current[0].lerp(new THREE.Vector2(0.5, 0.5), 0.05);
+      }
     }
 
-    // Lerp kursor coordinate for natural motion delay
-    mouseRef.current.x = THREE.MathUtils.lerp(mouseRef.current.x, targetMouse.current.x, 0.08);
-    mouseRef.current.y = THREE.MathUtils.lerp(mouseRef.current.y, targetMouse.current.y, 0.08);
-
-    materialRef.current.uniforms.uMouse.value.copy(mouseRef.current);
+    // Sync reference to uniform
+    materialRef.current.uniforms.uTrail.value = trailRef.current;
   });
 
   return (
