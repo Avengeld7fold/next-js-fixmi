@@ -146,7 +146,7 @@ export default function Home() {
         </div>
 
         {/* Social Media Icons — Bottom Left */}
-        <div className="absolute bottom-10 left-10 z-20 flex items-center gap-3">
+        <div className="absolute bottom-10 left-10 z-20 flex items-center gap-3 pointer-events-auto">
           {/* Instagram */}
           <a
             href="https://instagram.com"
