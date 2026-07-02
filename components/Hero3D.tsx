@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useMemo, Suspense } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, useProgress, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
 // Vertex shader
@@ -21,9 +20,8 @@ const fragmentShader = `
   uniform sampler2D uDepthMap;
   uniform vec2 uTrail[15];
   uniform float uTime;
+  uniform float uViewportAspect;
   uniform float uReveal;
-  uniform vec2 uResolution;
-  uniform vec2 uImageRes;
   varying vec2 vUv;
 
   // Classic Perlin 2D Noise
@@ -79,41 +77,39 @@ const fragmentShader = `
 
   void main() {
     // 1. Calculate texture UV mapped to center of the viewport (contain fit aspect ratio correction)
-    vec2 screenAspect = vec2(uResolution.x / uResolution.y, 1.0);
-    vec2 imageAspect = vec2(uImageRes.x / uImageRes.y, 1.0);
-    vec2 scale = vec2(1.0);
-    if (screenAspect.x > imageAspect.x) {
-      // Screen is wider than image (landscape) - scale width
-      scale = vec2(screenAspect.x / imageAspect.x, 1.0);
+    // Aspect ratio of textures is 1.0 (square)
+    vec2 textureUv = vUv;
+    if (uViewportAspect > 1.0) {
+      // Landscape: fit height, scale and center width
+      textureUv.x = (vUv.x - 0.5) * uViewportAspect + 0.5;
     } else {
-      // Screen is taller than image (portrait) - scale height
-      scale = vec2(1.0, imageAspect.x / screenAspect.x);
+      // Portrait: fit width, scale and center height
+      textureUv.y = (vUv.y - 0.5) / uViewportAspect + 0.5;
     }
-    vec2 newUv = (vUv - 0.5) * scale + 0.5;
 
-    // Boundary Check: prevent texture tiling by checking UV coordinates [0.0, 1.0] bounds
-    float alphaBounds = (newUv.x < 0.0 || newUv.x > 1.0 || newUv.y < 0.0 || newUv.y > 1.0) ? 0.0 : 1.0;
+    // Check if the current pixel is inside the square texture boundaries
+    bool inBounds = (textureUv.x >= 0.0 && textureUv.x <= 1.0 && textureUv.y >= 0.0 && textureUv.y <= 1.0);
 
     // 2. Read depth map value (only if within bounds to avoid wrapping artifacts)
     float depthValue = 0.0;
-    if (alphaBounds > 0.5) {
-      depthValue = texture2D(uDepthMap, newUv).r;
+    if (inBounds) {
+      depthValue = texture2D(uDepthMap, textureUv).r;
     }
 
     // 3. Parallax Effect: shift the coordinates based on newest mouse position (uTrail[0]) and depth
-    float depthIntensity = screenAspect.x > imageAspect.x ? 0.02 : 0.012;
+    float depthIntensity = uViewportAspect > 1.0 ? 0.02 : 0.012;
     vec2 mouseOffset = uTrail[0] - vec2(0.5);
     vec2 parallaxOffset = mouseOffset * depthValue * depthIntensity;
-    vec2 distortedUv = newUv + parallaxOffset;
+    vec2 distortedUv = textureUv + parallaxOffset;
 
     // Re-check bounds for parallax UV
-    float parallaxAlphaBounds = (distortedUv.x < 0.0 || distortedUv.x > 1.0 || distortedUv.y < 0.0 || distortedUv.y > 1.0) ? 0.0 : 1.0;
+    bool inParallaxBounds = (distortedUv.x >= 0.0 && distortedUv.x <= 1.0 && distortedUv.y >= 0.0 && distortedUv.y <= 1.0);
 
     // 4. Sample broken and fixed textures using parallax-displaced UVs
     vec4 colorBroken = vec4(0.0);
     vec4 colorFixed = vec4(0.0);
     
-    if (parallaxAlphaBounds > 0.5) {
+    if (inParallaxBounds) {
       colorBroken = texture2D(uTextureBroken, distortedUv);
       colorFixed = texture2D(uTextureFixed, distortedUv);
     }
@@ -141,7 +137,7 @@ const fragmentShader = `
     vec4 slashColor = vec4(0.9, 0.95, 1.0, mask * 0.8);
 
     // Blend texture color of iPhone fixed & broken, multiplied by viewport boundary
-    vec4 texColor = mix(colorBroken, colorFixed, mask) * parallaxAlphaBounds;
+    vec4 texColor = mix(colorBroken, colorFixed, mask) * (inParallaxBounds ? 1.0 : 0.0);
 
     // Combine output: phone layer + glowing sword trail on top
     vec4 finalColor = texColor + slashColor;
@@ -154,57 +150,40 @@ const fragmentShader = `
   }
 `;
 
-function DiagnosticLoader() {
-  const { progress } = useProgress();
+interface TexturesState {
+  broken: THREE.Texture;
+  fixed: THREE.Texture;
+  depth: THREE.Texture;
+}
+
+function DiagnosticLoader({ progress }: { progress: number }) {
   return (
-    <Html center>
-      <div className="flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none w-64 bg-background/80 p-6 rounded-lg border border-border/50 backdrop-blur-md">
-        <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
-          INITIALIZING WEBGL 2.5D SHADER
-        </div>
-        <div className="w-full h-1 bg-surface-alt border border-border rounded overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all duration-150 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="mt-2 text-[10px] text-text-muted uppercase">
-          Texture Bindings: {Math.round(progress)}%
-        </div>
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-background z-20">
+      <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
+        INITIALIZING WEBGL 2.5D SHADER
       </div>
-    </Html>
+      <div className="w-64 h-1 bg-surface-alt border border-border rounded overflow-hidden">
+        <div
+          className="h-full bg-primary transition-all duration-150 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="mt-2 text-[10px] text-text-muted uppercase">
+        Texture Bindings: {Math.round(progress)}%
+      </div>
+    </div>
   );
 }
 
 interface MagicShaderPlaneProps {
+  textures: TexturesState;
   isHoveredRef: React.RefObject<boolean>;
 }
 
 const TRAIL_LENGTH = 15;
 
-function MagicShaderPlane({ isHoveredRef }: MagicShaderPlaneProps) {
+function MagicShaderPlane({ textures, isHoveredRef }: MagicShaderPlaneProps) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
-
-  // Load textures using Drei's useTexture hook to guarantee sync loading inside Suspense
-  const [brokenTex, fixedTex, depthTex] = useTexture([
-    "/images/iphone-broken.png",
-    "/images/iphone-fixed.png",
-    "/images/iphone-depth.png",
-  ]);
-
-  // Ensure textures use linear filtering and clamp-to-edge wrapping to avoid texture unit bleed
-  useEffect(() => {
-    brokenTex.minFilter = THREE.LinearFilter;
-    fixedTex.minFilter = THREE.LinearFilter;
-    depthTex.minFilter = THREE.LinearFilter;
-
-    brokenTex.wrapS = THREE.ClampToEdgeWrapping;
-    brokenTex.wrapT = THREE.ClampToEdgeWrapping;
-    fixedTex.wrapS = THREE.ClampToEdgeWrapping;
-    fixedTex.wrapT = THREE.ClampToEdgeWrapping;
-    depthTex.wrapS = THREE.ClampToEdgeWrapping;
-    depthTex.wrapT = THREE.ClampToEdgeWrapping;
-  }, [brokenTex, fixedTex, depthTex]);
 
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   
@@ -236,31 +215,30 @@ function MagicShaderPlane({ isHoveredRef }: MagicShaderPlaneProps) {
     return () => window.removeEventListener("deviceorientation", handleOrientation);
   }, []);
 
-  // Use useMemo for uniforms to ensure textures are correctly registered and mapped in WebGL
-  const uniforms = useMemo(() => ({
-    uTextureBroken: { value: brokenTex },
-    uTextureFixed: { value: fixedTex },
-    uDepthMap: { value: depthTex },
+  // Initialize uniforms using useRef (exactly as in 2b2932b for 100% stable rendering)
+  const uniforms = useRef({
+    uTextureBroken: { value: textures.broken },
+    uTextureFixed: { value: textures.fixed },
+    uDepthMap: { value: textures.depth },
     uTrail: { value: trailRef.current },
     uTime: { value: 0 },
+    uViewportAspect: { value: viewportWidth / viewportHeight },
     uReveal: { value: 0.0 },
-    uResolution: { value: new THREE.Vector2(viewportWidth, viewportHeight) },
-    uImageRes: { value: new THREE.Vector2(1000, 1000) }, // Square texture aspect 1.0
-  }), [brokenTex, fixedTex, depthTex, viewportWidth, viewportHeight]);
+  });
 
   useFrame((state) => {
     if (!materialRef.current) return;
 
-    // Enforce active texture unit bindings every frame to avoid WebGL state mapping mismatch
-    materialRef.current.uniforms.uTextureBroken.value = brokenTex;
-    materialRef.current.uniforms.uTextureFixed.value = fixedTex;
-    materialRef.current.uniforms.uDepthMap.value = depthTex;
+    // Enforce active texture unit bindings every frame to prevent any potential GPU unit mismatch
+    materialRef.current.uniforms.uTextureBroken.value = textures.broken;
+    materialRef.current.uniforms.uTextureFixed.value = textures.fixed;
+    materialRef.current.uniforms.uDepthMap.value = textures.depth;
 
     // Update time uniform continuously
     materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
 
-    // Sync viewport resolution dynamically
-    materialRef.current.uniforms.uResolution.value.set(viewportWidth, viewportHeight);
+    // Sync viewport aspect dynamically
+    materialRef.current.uniforms.uViewportAspect.value = viewportWidth / viewportHeight;
 
     // Combine pointer states
     const activeHover = isHovered.current || isHoveredRef.current;
@@ -311,7 +289,7 @@ function MagicShaderPlane({ isHoveredRef }: MagicShaderPlaneProps) {
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        uniforms={uniforms}
+        uniforms={uniforms.current}
         transparent={true}
       />
     </mesh>
@@ -319,7 +297,48 @@ function MagicShaderPlane({ isHoveredRef }: MagicShaderPlaneProps) {
 }
 
 export default function Hero3D() {
+  const [textures, setTextures] = useState<TexturesState | null>(null);
+  const [progress, setProgress] = useState<number>(0);
   const isHoveredRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const manager = new THREE.LoadingManager();
+    const loader = new THREE.TextureLoader(manager);
+
+    let brokenTex: THREE.Texture;
+    let fixedTex: THREE.Texture;
+    let depthTex: THREE.Texture;
+
+    manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      setProgress((itemsLoaded / itemsTotal) * 100);
+    };
+
+    manager.onLoad = () => {
+      // Ensure textures use linear filtering for smooth rendering
+      brokenTex.minFilter = THREE.LinearFilter;
+      fixedTex.minFilter = THREE.LinearFilter;
+      depthTex.minFilter = THREE.LinearFilter;
+
+      // Enable ClampToEdgeWrapping for extreme parallax offsets
+      brokenTex.wrapS = THREE.ClampToEdgeWrapping;
+      brokenTex.wrapT = THREE.ClampToEdgeWrapping;
+      fixedTex.wrapS = THREE.ClampToEdgeWrapping;
+      fixedTex.wrapT = THREE.ClampToEdgeWrapping;
+      depthTex.wrapS = THREE.ClampToEdgeWrapping;
+      depthTex.wrapT = THREE.ClampToEdgeWrapping;
+
+      // Set state to trigger Canvas mount
+      setTextures({
+        broken: brokenTex,
+        fixed: fixedTex,
+        depth: depthTex,
+      });
+    };
+
+    brokenTex = loader.load("/images/iphone-broken.png");
+    fixedTex = loader.load("/images/iphone-fixed.png");
+    depthTex = loader.load("/images/iphone-depth.png");
+  }, []);
 
   return (
     <div 
@@ -332,15 +351,17 @@ export default function Hero3D() {
       onPointerUp={() => { isHoveredRef.current = false; }}
       onPointerCancel={() => { isHoveredRef.current = false; }}
     >
-      <Canvas
-        camera={{ position: [0, 0, 1], fov: 90 }}
-        gl={{ antialias: true, alpha: true }}
-        className="w-full h-full touch-pan-y"
-      >
-        <Suspense fallback={<DiagnosticLoader />}>
-          <MagicShaderPlane isHoveredRef={isHoveredRef} />
-        </Suspense>
-      </Canvas>
+      {!textures ? (
+        <DiagnosticLoader progress={progress} />
+      ) : (
+        <Canvas
+          camera={{ position: [0, 0, 1], fov: 90 }}
+          gl={{ antialias: true, alpha: true }}
+          className="w-full h-full touch-pan-y"
+        >
+          <MagicShaderPlane textures={textures} isHoveredRef={isHoveredRef} />
+        </Canvas>
+      )}
     </div>
   );
 }
